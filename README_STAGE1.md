@@ -16,3 +16,10 @@
 
 ## Guard
 PWA Stage 1 hanya membaca `getDashboardIndexStatusV24_1`, `getProductionDashboardConfig`, dan `getProductionDashboardDataFastV24_1`.
+
+
+## Stage 2.0.2
+- Diagnostic HTTP/upstream error details.
+- Snapshot retry once for transient non-JSON/5xx.
+- Keeps last-known-good UI on refresh failure.
+- Snapshot timeout 45s.

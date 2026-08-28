@@ -1,5 +1,22 @@
 const ALLOWED=new Set(['status','config','snapshot','dashboard']);
 
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+async function fetchUpstream(url, action){
+  const started=Date.now();
+  const controller=new AbortController();
+  const timeoutMs=action==='snapshot'?45000:180000;
+  const timer=setTimeout(()=>controller.abort(),timeoutMs);
+  try{
+    const r=await fetch(url,{redirect:'follow',signal:controller.signal,headers:{'Accept':'application/json'}});
+    const text=await r.text();
+    const ct=r.headers.get('content-type')||'';
+    let body=null;
+    try{body=JSON.parse(text);}catch{}
+    return {r,text,ct,body,elapsedMs:Date.now()-started};
+  }finally{clearTimeout(timer);}
+}
+
 module.exports=async function handler(req,res){
   res.setHeader('Cache-Control','no-store, max-age=0');
   res.setHeader('X-Robots-Tag','noindex');
@@ -30,35 +47,49 @@ module.exports=async function handler(req,res){
     upstream.searchParams.set('end',end);
   }
 
-  const started=Date.now();
+  const requestStarted=Date.now();
+  let attempts=0;
+  let last=null;
   try{
-    const controller=new AbortController();
-    const timer=setTimeout(()=>controller.abort(), action==='snapshot'?30000:180000);
-    const r=await fetch(upstream,{redirect:'follow',signal:controller.signal,headers:{'Accept':'application/json'}});
-    clearTimeout(timer);
-    const text=await r.text();
-    const ct=r.headers.get('content-type')||'';
-    let body;
-    try{ body=JSON.parse(text); }
-    catch{
-      return res.status(502).json({ok:false,error:'UPSTREAM_NON_JSON',upstreamHttpStatus:r.status,contentType:ct,preview:text.slice(0,180),elapsedMs:Date.now()-started});
+    const maxAttempts=action==='snapshot'?2:1;
+    while(attempts<maxAttempts){
+      attempts++;
+      last=await fetchUpstream(upstream,action);
+      const {r,text,ct,body}=last;
+      if(body){
+        const bodyStatus=Number(body?.httpStatus||200);
+        const ok=r.ok && bodyStatus>=200 && bodyStatus<300 && body?.ok!==false;
+        // Retry only transient upstream/server failures on snapshot.
+        if(action==='snapshot' && attempts<maxAttempts && (!ok && (r.status>=500 || bodyStatus>=500))){
+          await sleep(700); continue;
+        }
+        const status=ok?200:(bodyStatus||502);
+        return res.status(status).json({
+          ok,action,attempts,
+          upstreamHttpStatus:r.status,
+          bodyHttpStatus:bodyStatus,
+          contentType:ct,
+          elapsedMs:Date.now()-requestStarted,
+          apiVersion:body?.apiVersion||null,
+          error:body?.error||null,
+          message:body?.message||null,
+          snapshotHit:body?.snapshotHit,
+          storage:body?.storage||null,
+          data:body
+        });
+      }
+      // Non JSON can be a transient Apps Script HTML error/login/cold-start page.
+      if(action==='snapshot' && attempts<maxAttempts){await sleep(700);continue;}
+      return res.status(502).json({
+        ok:false,action,attempts,error:'UPSTREAM_NON_JSON',
+        upstreamHttpStatus:r.status,contentType:ct,
+        preview:text.slice(0,320),elapsedMs:Date.now()-requestStarted
+      });
     }
-
-    const bodyStatus=Number(body?.httpStatus||200);
-    const ok=r.ok && bodyStatus>=200 && bodyStatus<300 && body?.ok!==false;
-    const status=ok?200:(bodyStatus||502);
-    return res.status(status).json({
-      ok,action,
-      upstreamHttpStatus:r.status,
-      bodyHttpStatus:bodyStatus,
-      contentType:ct,
-      elapsedMs:Date.now()-started,
-      apiVersion:body?.apiVersion||null,
-      error:body?.error||null,
-      message:body?.message||null,
-      data:body
-    });
   }catch(err){
-    return res.status(err?.name==='AbortError'?504:502).json({ok:false,error:err?.name==='AbortError'?'UPSTREAM_TIMEOUT':'UPSTREAM_FETCH_FAILED',message:String(err?.message||err),elapsedMs:Date.now()-started});
+    return res.status(err?.name==='AbortError'?504:502).json({
+      ok:false,action,attempts,error:err?.name==='AbortError'?'UPSTREAM_TIMEOUT':'UPSTREAM_FETCH_FAILED',
+      message:String(err?.message||err),elapsedMs:Date.now()-requestStarted
+    });
   }
 };
