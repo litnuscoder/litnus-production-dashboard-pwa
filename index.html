@@ -1,0 +1,103 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0f172a"><link rel="manifest" href="/manifest.webmanifest"><title>Litnus PWA Stage 1 Diagnostic</title><style>:root{color-scheme:dark;--bg:#080b11;--p:#111827;--p2:#0b1220;--b:#2a3850;--t:#eef2f7;--m:#91a0b8;--g:#34d399;--c:#22d3ee;--a:#fbbf24;--r:#fb7185}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,#172238,#080b11 42%);color:var(--t);font-family:Inter,system-ui,sans-serif}.app{max-width:1120px;margin:auto;padding:18px}.head,.panel,.k{border:1px solid var(--b);background:rgba(17,24,39,.94);border-radius:16px}.head{padding:12px 14px;display:flex;justify-content:space-between;gap:12px;align-items:center}.brand{font-weight:900;font-size:18px}.sub,.muted{color:var(--m);font-size:11px}.badge{padding:7px 10px;border-radius:999px;border:1px solid #335;color:var(--g);font-size:10px;font-weight:900}.grid2{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;margin-top:14px}.panel{padding:16px}.title{font-size:21px;font-weight:900;margin:4px 0 8px}.btn{height:40px;border:0;border-radius:10px;background:#2563eb;color:white;font-weight:850;padding:0 14px;cursor:pointer}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:14px}.k{padding:12px;background:linear-gradient(#141d2d,#101724)}.kl{font-size:9px;color:var(--m);font-weight:800}.kv{font-size:24px;font-weight:900;margin-top:6px}.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:12px}.step{border:1px solid var(--b);border-radius:10px;padding:9px;background:var(--p2);font-size:10px}.step.ok{border-color:#1f7a63}.log{white-space:pre-wrap;overflow-wrap:anywhere;background:#090e18;border:1px solid var(--b);border-radius:10px;padding:11px;font:10px/1.5 ui-monospace,monospace;min-height:112px}.diag{margin-top:10px;max-height:370px;overflow:auto}.status{font-size:10px;color:var(--m);margin-top:10px}.warn{border:1px solid #6b5420;background:#251f10;color:#e7d69e;padding:10px;border-radius:10px;font-size:10px;line-height:1.5;margin-top:10px}@media(max-width:760px){.grid2{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.flow{grid-template-columns:1fr}.app{padding:9px}}</style></head><body><main class="app"><header class="head"><div><div class="brand">⛵ Litnus Production Dashboard</div><div class="sub">PWA Pilot · Stage 1.6 · Cache Snapshot API</div></div><div id="badge" class="badge">CHECKING</div></header><div class="grid2"><section class="panel"><div class="muted">VALIDASI UPSTREAM</div><div class="title">Cache-only Snapshot dari ACTIVE Index</div><div class="muted">Status dan endpoint snapshot cache-only dibaca paralel. Snapshot tidak memindai ACTIVE index dan tidak menjalankan kalkulasi dashboard penuh.</div><p><button id="sync" class="btn">↻ Uji Sync Read-only</button></p><div class="kpis"><div class="k"><div class="kl">ORDER</div><div id="order" class="kv">—</div></div><div class="k"><div class="kl">EKS</div><div id="copies" class="kv">—</div></div><div class="k"><div class="kl">INDEX</div><div id="index" class="kv">—</div></div><div class="k"><div class="kl">LATENCY</div><div id="lat" class="kv">—</div></div></div><div class="flow"><div class="step ok">1 · App Shell</div><div id="sw" class="step">2 · Service Worker</div><div id="api" class="step">3 · Vercel API</div><div id="gas" class="step">4 · Apps Script</div><div id="ready" class="step">5 · Data Ready</div></div><div id="status" class="status">Menyiapkan…</div></section><aside class="panel"><div class="muted">UPSTREAM DIAGNOSTIC</div><div id="log" class="log">boot…</div><div id="shape" class="log diag">Klik Uji Sync Read-only.</div><div class="warn"><b>Write guard aktif.</b> Hanya status/config/snapshot/dashboard yang tersedia.</div></aside></div></main><script>
+const $=id=>document.getElementById(id);
+const fmt=n=>new Intl.NumberFormat('id-ID').format(Number(n||0));
+function lg(s){$('log').textContent+=($('log').textContent?'\n':'')+s}
+function monthRange(){
+  const now=new Date();
+  const y=now.getFullYear(), m=now.getMonth()+1;
+  const mm=String(m).padStart(2,'0');
+  const last=new Date(y,m,0).getDate();
+  return {y,m,start:`${y}-${mm}-01`,end:`${y}-${mm}-${String(last).padStart(2,'0')}`};
+}
+async function boot(){
+  if('serviceWorker'in navigator){
+    try{await navigator.serviceWorker.register('/service-worker.js');$('sw').classList.add('ok');lg('SW: registered')}
+    catch(e){lg('SW ERROR: '+e.message)}
+  }
+  try{
+    const r=await fetch('/api/health',{cache:'no-store'}),h=await r.json();
+    $('api').classList.add('ok');$('badge').textContent=h.mode;lg('API: '+h.mode);
+    if(h.upstreamConfigured)$('gas').classList.add('ok')
+  }catch(e){lg('HEALTH ERROR: '+e.message)}
+  restoreSnapshot();
+  $('status').textContent='Siap sinkronisasi cepat';
+}
+async function get(url){
+  const r=await fetch(url,{cache:'no-store'}); let d={};
+  try{d=await r.json()}catch{}
+  return{ok:r.ok,status:r.status,data:d};
+}
+function unwrapGateway(res){
+  // Vercel -> Apps Script body -> dashboard payload
+  const g=res?.data||{};
+  const body=(g.data && typeof g.data==='object')?g.data:g;
+  const payload=(body.data && typeof body.data==='object')?body.data:body;
+  return {gateway:g,body,payload};
+}
+function safeShape(obj){
+  if(!obj||typeof obj!=='object') return {type:typeof obj};
+  const out={keys:Object.keys(obj)};
+  ['summary','meta','cache'].forEach(k=>{
+    if(obj[k]&&typeof obj[k]==='object')out[k+'Keys']=Object.keys(obj[k]);
+  });
+  return out;
+}
+function renderSnapshot(summary,idx,latency,source){
+  const ord=Number(summary?.naskahMasuk ?? summary?.totalOrder ?? 0);
+  const cps=Number(summary?.totalEksemplar ?? 0);
+  $('order').textContent=fmt(ord);
+  $('copies').textContent=fmt(cps);
+  $('index').textContent=fmt(idx);
+  if(latency!=null)$('lat').textContent=fmt(Math.round(latency))+' ms';
+  if(source)$('status').textContent=source;
+}
+function restoreSnapshot(){
+  try{
+    const raw=localStorage.getItem('litnus:pwa:stage15:snapshot');
+    if(!raw)return;
+    const s=JSON.parse(raw);
+    renderSnapshot(s.summary,s.index,null,'Menampilkan snapshot terakhir · sinkronisasi baru siap dijalankan');
+    lg('SNAPSHOT: restored');
+  }catch(_){ }
+}
+function saveSnapshot(summary,index){
+  try{localStorage.setItem('litnus:pwa:stage15:snapshot',JSON.stringify({summary,index,savedAt:Date.now()}))}catch(_){ }
+}
+async function sync(){
+  const b=$('sync');b.disabled=true;$('ready').classList.remove('ok');
+  const t=performance.now(); $('status').textContent='Sinkronisasi ACTIVE…';
+  try{
+    const r=monthRange();
+    const dashboardUrl=`/api/read?action=snapshot&start=${r.start}&end=${r.end}`;
+    // Tidak lagi 4 request serial. Hanya 2 request dan keduanya paralel.
+    const [s,x]=await Promise.all([
+      get('/api/read?action=status'),
+      get(dashboardUrl)
+    ]);
+    if(!s.ok)throw Error('STATUS '+s.status+' '+(s.data.error||''));
+    if(!x.ok)throw Error('DASHBOARD '+x.status+' '+(x.data.error||x.data.message||''));
+    const su=unwrapGateway(s), xu=unwrapGateway(x);
+    const statusPayload=su.payload;
+    const dashboard=xu.payload;
+    if(dashboard?.success===false)throw Error(dashboard.message||'Dashboard backend belum siap');
+    const summary=dashboard?.summary||{};
+    const idx=Number(statusPayload?.activeRows ?? statusPayload?.activeIndex?.rows ?? 0);
+    const elapsed=performance.now()-t;
+    renderSnapshot(summary,idx,elapsed,`Sinkronisasi berhasil · ${r.start} → ${r.end}`);
+    saveSnapshot(summary,idx);
+    $('gas').classList.add('ok');$('ready').classList.add('ok');lg('SYNC FAST OK');
+    $('shape').textContent='FAST SNAPSHOT\n'+JSON.stringify({
+      range:{start:r.start,end:r.end},
+      status:{activeRows:idx,keys:Object.keys(statusPayload||{})},
+      dashboard:safeShape(dashboard),
+      summaryKeys:Object.keys(summary||{}),
+      mapped:{naskahMasuk:summary?.naskahMasuk,totalEksemplar:summary?.totalEksemplar,totalHlmCetak:summary?.totalHlmCetak},
+      transportMs:Math.round(elapsed)
+    },null,2);
+  }catch(e){
+    $('lat').textContent=fmt(Math.round(performance.now()-t))+' ms';
+    $('status').textContent='Sync gagal · lihat diagnostic'; lg('SYNC ERROR: '+e.message);
+  }finally{b.disabled=false}
+}
+$('sync').addEventListener('click',sync);boot();
+</script></body></html>
