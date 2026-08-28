@@ -5103,6 +5103,11 @@ input[type="date"].orca-date-input::-webkit-calendar-picker-indicator{opacity:0;
 }
 </style>
 
+
+<style id="litnus-paper-canonical-zero-v336">
+.inventory-health-card[data-virtual-paper="1"]{border-style:dashed;background:linear-gradient(180deg,#fff,#fbfdfe)}
+.inventory-health-card[data-virtual-paper="1"] .inventory-health-meta span:last-child{color:#8a9aa7}
+</style>
 </head>
 <body class="session-locked">
   <div id="boot" class="boot-screen">
@@ -6197,6 +6202,7 @@ let inventoryV4MachineFilter="";
 let inventoryV4Search="";
 let inventoryV4PaperTypeFilter="";
 let inventoryV4PaperFormatFilter="";
+const inventoryV4VirtualPaperRows=new Map();
 
 function inventoryPaperMeta(ci){
   if(!ci||String(ci.category||'').toLowerCase()!=='paper')return null;
@@ -6229,6 +6235,33 @@ function inventoryPaperMeta(ci){
 }
 function inventoryPaperIsActive(){
   return String(inventoryV4MachineFilter||'')==='general:Kertas / Media';
+}
+function inventoryV4PaperProfiles(){
+  try{return typeof window.ORCA_PAPER_PROFILE_LIST==='function'?window.ORCA_PAPER_PROFILE_LIST():[]}catch{return[]}
+}
+function inventoryV4BuildRows(){
+  const base=(state.stock||[]).map(s=>({s,ci:catalogItem(s.catalog_item_id)})).filter(x=>x.ci);
+  inventoryV4VirtualPaperRows.clear();
+  if(!inventoryPaperIsActive())return base;
+  const byCode=new Map(base.filter(x=>String(x.ci.category||'').toLowerCase()==='paper'&&x.ci.part_number).map(x=>[String(x.ci.part_number),x]));
+  const paperRows=[];
+  for(const p of inventoryV4PaperProfiles()){
+    const existing=byCode.get(String(p.code));
+    if(existing){paperRows.push(existing);continue}
+    const id=`virtual:${p.code}`;
+    const ci={id,item_name:p.label,part_number:p.code,machine_model:'Kertas / Media',category:'paper',unit:p.unit||'pack',quality_grade:'Standard',__virtualPaper:true,__paperProfile:p};
+    const s={id:'',catalog_item_id:id,qty:0,min_stock:0,avg_cost:0,check_days:0,last_updated_at:null,__virtualPaper:true};
+    const row={s,ci};inventoryV4VirtualPaperRows.set(id,row);paperRows.push(row);
+  }
+  // Tetap tampilkan paper DB lama yang belum punya canonical profile, agar histori tidak hilang dari UI.
+  for(const row of base){if(String(row.ci.category||'').toLowerCase()!=='paper')continue;if(row.ci.part_number&&inventoryV4PaperProfiles().some(p=>p.code===row.ci.part_number))continue;paperRows.push(row)}
+  return paperRows;
+}
+function inventoryV4SelectedRow(){
+  const virtual=inventoryV4VirtualPaperRows.get(String(inventoryV4SelectedCatalogId||''));
+  if(virtual)return virtual;
+  const ci=catalogItem(inventoryV4SelectedCatalogId),s=stockByCatalog(inventoryV4SelectedCatalogId);
+  return ci&&s?{ci,s}:null;
 }
 
 function inventoryStatus(s){
@@ -6266,7 +6299,7 @@ function inventoryCategoryLabel(category){
   return map[category]||String(category||'Lainnya').replaceAll('_',' ');
 }
 function renderInventoryV4(){
-  const rows=(state.stock||[]).map(s=>({s,ci:catalogItem(s.catalog_item_id)})).filter(x=>x.ci);
+  const rows=inventoryV4BuildRows();
   if(!rows.length)return;
 
   const machineFilter=$('inventoryMachineFilter');
@@ -6307,7 +6340,7 @@ function renderInventoryV4(){
   const q=inventoryV4Search.trim().toLowerCase();
   const filteredRows=rows.filter(({ci})=>{
     const machineOk=!filterModels.size||filterModels.has(String(ci.machine_model||''));
-    const haystack=`${ci.item_name||''} ${ci.part_number||''} ${aliasesFor(ci.id).map(a=>a.alias_name).join(' ')}`.toLowerCase();
+    const haystack=`${ci.item_name||''} ${ci.part_number||''} ${ci.__virtualPaper?'':aliasesFor(ci.id).map(a=>a.alias_name).join(' ')}`.toLowerCase();
     if(!machineOk||(q&&!haystack.includes(q)))return false;
     if(!paperMode)return true;
     const p=inventoryPaperMeta(ci);
@@ -6322,10 +6355,11 @@ function renderInventoryV4(){
     inventoryV4SelectedCatalogId=filteredRows[0].ci.id;
   }
 
-  const assetValue=rows.reduce((a,x)=>a+inventoryItemValue(x.s),0);
-  const units=rows.reduce((a,x)=>a+Number(x.s.qty||0),0);
-  const low=rows.filter(x=>['low','out'].includes(inventoryStatus(x.s).key)).length;
-  const due=rows.filter(x=>['due','soon'].includes(inventoryCheckStatus(x.s).key)).length;
+  const realRows=(state.stock||[]).map(s=>({s,ci:catalogItem(s.catalog_item_id)})).filter(x=>x.ci);
+  const assetValue=realRows.reduce((a,x)=>a+inventoryItemValue(x.s),0);
+  const units=realRows.reduce((a,x)=>a+Number(x.s.qty||0),0);
+  const low=realRows.filter(x=>['low','out'].includes(inventoryStatus(x.s).key)).length;
+  const due=realRows.filter(x=>['due','soon'].includes(inventoryCheckStatus(x.s).key)).length;
 
   const stats=$('inventoryV4Stats');
   if(stats)stats.innerHTML=`
@@ -6344,9 +6378,9 @@ function renderInventoryV4(){
       return rank[inventoryStatus(a.s).key]-rank[inventoryStatus(b.s).key] || String(a.ci.item_name).localeCompare(String(b.ci.item_name));
     })
     .map(({s,ci})=>{
-      const st=inventoryStatus(s),latest=inventoryLatestInTxn(ci.id),check=inventoryCheckStatus(s);
+      const st=inventoryStatus(s),latest=ci.__virtualPaper?null:inventoryLatestInTxn(ci.id),check=inventoryCheckStatus(s);
       const selected=String(ci.id)===String(inventoryV4SelectedCatalogId)?' selected':'';
-      return `<button type="button" class="inventory-health-card${selected}" data-inventory-item="${escapeHtml(ci.id)}">
+      return `<button type="button" class="inventory-health-card${selected}" data-inventory-item="${escapeHtml(ci.id)}" data-virtual-paper="${ci.__virtualPaper?'1':'0'}">
         <div class="inventory-health-top">
           <span class="inventory-health-status ${st.key}"><i></i>${escapeHtml(st.label)}</span>
           <span class="inventory-category-tag">${escapeHtml((inventoryPaperMeta(ci)?.bookLabel)||inventoryCategoryLabel(ci.category))}</span>
@@ -6381,7 +6415,7 @@ function renderInventoryV4(){
   }).join(''):'<div class="inventory-v4-empty">Belum ada movement.</div>';
 
   const categoryMap=new Map();
-  rows.forEach(({s,ci})=>{
+  realRows.forEach(({s,ci})=>{
     const key=ci.category||'other';
     const cur=categoryMap.get(key)||{value:0,items:0,units:0};
     cur.value+=inventoryItemValue(s);
@@ -6403,18 +6437,19 @@ function renderInventoryV4(){
   renderInventoryV4Detail();
 }
 function renderInventoryV4Detail(){
-  const ci=catalogItem(inventoryV4SelectedCatalogId),s=stockByCatalog(inventoryV4SelectedCatalogId),el=$('inventoryV4Detail');
-  if(!ci||!s||!el)return;
-  const st=inventoryStatus(s),latest=inventoryLatestInTxn(ci.id),check=inventoryCheckStatus(s);
-  const moves=inventoryMovements(ci.id).slice(0,5);
-  const aliases=aliasesFor(ci.id).slice(0,4);
+  const row=inventoryV4SelectedRow(),el=$('inventoryV4Detail');
+  if(!row||!el)return;
+  const {ci,s}=row;
+  const st=inventoryStatus(s),latest=ci.__virtualPaper?null:inventoryLatestInTxn(ci.id),check=inventoryCheckStatus(s);
+  const moves=ci.__virtualPaper?[]:inventoryMovements(ci.id).slice(0,5);
+  const aliases=ci.__virtualPaper?[]:aliasesFor(ci.id).slice(0,4);
   const paperMeta=inventoryPaperMeta(ci);
   el.innerHTML=`
     <div class="inventory-detail-head">
       <div><span class="inventory-health-status ${st.key}"><i></i>${escapeHtml(st.label)}</span><h3>${escapeHtml(ci.item_name)}</h3>${paperMeta
         ?`<div class="inventory-paper-detail-profile"><span>${escapeHtml(paperMeta.typeLabel)}</span><span>${escapeHtml(paperMeta.layoutLabel)}</span><span>${escapeHtml(paperMeta.bookLabel)}</span><span>${escapeHtml(paperMeta.sizeCm)}</span></div>`
         :`<small>${escapeHtml(ci.machine_model||'Universal')} · ${escapeHtml(ci.quality_grade||'-')}</small>`}</div>
-      <button class="inventory-detail-manage" type="button" data-inventory-manage="${escapeHtml(s.id)}">Kelola</button>
+      ${ci.__virtualPaper?'':`<button class="inventory-detail-manage" type="button" data-inventory-manage="${escapeHtml(s.id)}">Kelola</button>`}
     </div>
     <div class="inventory-detail-stock">
       <div><span>Current stock</span><b>${fmt(s.qty)} <small>${escapeHtml(ci.unit||'pcs')}</small></b></div>
@@ -6439,8 +6474,8 @@ function renderInventoryV4Detail(){
       <div class="inventory-detail-movements">${moves.map(x=>`<div><span class="${x.txn_type==='in'?'in':'out'}">${x.txn_type==='in'?'+':'-'}${fmt(x.qty)}</span><span><b>${escapeHtml(x.txn_type==='in'?'Stock IN':'Stock OUT')}</b><small>${escapeHtml(x.txn_date||'-')} · ${money(x.unit_cost||0)}/unit</small></span></div>`).join('')||'<div class="inventory-v4-empty">Belum ada movement.</div>'}</div>
     </div>
     <div class="inventory-detail-actions">
-      <button class="btn ghost" type="button" data-inventory-action="usage" data-inventory-catalog="${escapeHtml(ci.id)}">Pakai Bahan</button>
-      <button class="btn primary" type="button" data-inventory-action="stock-in" data-inventory-catalog="${escapeHtml(ci.id)}">Tambah Stok</button>
+      ${ci.__virtualPaper?'':`<button class="btn ghost" type="button" data-inventory-action="usage" data-inventory-catalog="${escapeHtml(ci.id)}">Pakai Bahan</button>`}
+      ${paperMeta?`<button class="btn primary" type="button" data-paper-stock-add="${escapeHtml(ci.part_number||'')}">+ Stok Kertas</button>`:`<button class="btn primary" type="button" data-inventory-action="stock-in" data-inventory-catalog="${escapeHtml(ci.id)}">Tambah Stok</button>`}
     </div>`;
 }
 
@@ -7935,7 +7970,7 @@ boot();
   }
 
   const baseRenderInventory=renderInventoryV4;renderInventoryV4=function(){baseRenderInventory();renderPaperShelf()};
-  const baseRenderDetail=renderInventoryV4Detail;renderInventoryV4Detail=function(){baseRenderDetail();const ci=catalogItem(inventoryV4SelectedCatalogId);if(String(ci?.category||'').toLowerCase()!=='paper')return;const el=$('inventoryV4Detail'),p=paperProfileForCatalog(ci),actions=el?.querySelector('.inventory-detail-actions');if(actions)actions.innerHTML=`<button class="btn ghost" type="button" data-inventory-manage="${escapeHtml(stockByCatalog(ci.id)?.id||'')}">Kelola / Opname</button><button class="btn primary" type="button" data-paper-stock-add="${escapeHtml(p?.code||ci.part_number||'')}" data-paper-catalog="${escapeHtml(ci.id)}">+ Stok Kertas</button>`;};
+  const baseRenderDetail=renderInventoryV4Detail;renderInventoryV4Detail=function(){baseRenderDetail();const row=inventoryV4SelectedRow();const ci=row?.ci;if(String(ci?.category||'').toLowerCase()!=='paper')return;const el=$('inventoryV4Detail'),p=paperProfileForCatalog(ci)||ci.__paperProfile,actions=el?.querySelector('.inventory-detail-actions');if(actions)actions.innerHTML=`${ci.__virtualPaper?'':`<button class="btn ghost" type="button" data-inventory-manage="${escapeHtml(row?.s?.id||'')}">Kelola / Opname</button>`}<button class="btn primary" type="button" data-paper-stock-add="${escapeHtml(p?.code||ci.part_number||'')}">+ Stok Kertas</button>`;};
   const baseFillSelects=fillSelects;fillSelects=function(){baseFillSelects();fillPaperSupplierOptions()};
 
   document.addEventListener('click',e=>{const f=e.target.closest('[data-paper-filter]');if(f){paperShelfFilter=f.dataset.paperFilter||'all';document.querySelectorAll('[data-paper-filter]').forEach(b=>b.classList.toggle('on',b===f));renderPaperShelf();return}const add=e.target.closest('[data-paper-stock-add]');if(add){openPaperStock(add.dataset.paperStockAdd||'');return}});
