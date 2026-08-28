@@ -5,7 +5,7 @@ module.exports=async function handler(req,res){
   return res.status(200).json({
     ok:true,
     service:'litnus-production-dashboard-pwa',
-    stage:'STAGE_1_6_CACHE_SNAPSHOT',
+    stage:'STAGE_2_READONLY_DASHBOARD',
     upstreamConfigured:configured,
     mode:configured?'READ_ONLY_UPSTREAM':'ENV_NOT_CONFIGURED',
     now:new Date().toISOString()
