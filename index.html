@@ -57,7 +57,7 @@
 <script>
 const $=id=>document.getElementById(id), fmt=n=>new Intl.NumberFormat('id-ID').format(Number(n||0));
 const COLORS=['#20d5f2','#2bd492','#ffb51f','#ff657d','#b56cff','#4e83ff','#7fd36b','#ff8f45'];
-function iso(d){return d.toISOString().slice(0,10)}
+function iso(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
 function monthRange(d=new Date()){const y=d.getFullYear(),m=d.getMonth();return{start:iso(new Date(y,m,1)),end:iso(new Date(y,m+1,0))}}
 function setRange(start,end){$('start').value=start;$('end').value=end;updateMeta()}
 function updateMeta(){$('filterMeta').textContent=`Mode RANGE · ${$('start').value||'—'} → ${$('end').value||'—'} · PWA membaca snapshot persisten`}
