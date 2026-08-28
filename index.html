@@ -60,7 +60,7 @@ const COLORS=['#20d5f2','#2bd492','#ffb51f','#ff657d','#b56cff','#4e83ff','#7fd3
 function iso(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
 function monthRange(d=new Date()){const y=d.getFullYear(),m=d.getMonth();return{start:iso(new Date(y,m,1)),end:iso(new Date(y,m+1,0))}}
 function setRange(start,end){$('start').value=start;$('end').value=end;updateMeta()}
-function updateMeta(){$('filterMeta').textContent=`Mode RANGE · ${$('start').value||'—'} → ${$('end').value||'—'} · PWA membaca snapshot persisten`}
+function updateMeta(){$('filterMeta').textContent=`Mode RANGE · ${$('start').value||'—'} → ${$('end').value||'—'} · PWA membaca ACTIVE index secara live`}
 function initRange(){const r=monthRange();setRange(r.start,r.end)}
 function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2600)}
 async function get(url){const r=await fetch(url,{cache:'no-store'});let d={};try{d=await r.json()}catch{}return{ok:r.ok,status:r.status,data:d}}
@@ -70,34 +70,43 @@ function renderKpis(data){const s=data?.summary||{},a=data?.achievement||{};$('k
 function listRows(arr){return (Array.isArray(arr)?arr:[]).map(x=>`<div class="row"><b>${x.label||'-'}</b><span>${fmt(x.titles)} naskah · ${fmt(x.copies)} eks</span></div>`).join('')||'<div class="row"><b>Belum ada data</b><span>—</span></div>'}
 function stageCard(name,active,titles,list){return `<article class="stage"><div class="stageTop"><div class="stageName">${name}</div><div class="stageMain">${fmt(active)} eks<span>${fmt(titles)} judul</span></div></div><div class="miniBar"><i style="width:${Math.min(100,Math.max(2,active?14:2))}%"></i></div><div class="rows">${listRows(list)}</div></article>`}
 function renderProgress(data){const p=data?.progress||{};$('tower').innerHTML=stageCard('01 · COVER',p.coverActive,p.coverActiveTitles,p.cover)+stageCard('02 · ISI',p.isiActive,p.isiActiveTitles,p.isi)+stageCard('03 · FINISHING',p.finishingActive,p.finishingActiveTitles,p.finishing);const cards=[['Cover dalam proses',p.coverActive,p.coverActiveTitles,''],['Isi dalam proses',p.isiActive,p.isiActiveTitles,''],['Finishing dalam proses',p.finishingActive,p.finishingActiveTitles,''],['Siap diambil',p.readyPickup,p.readyPickupTitles,'green'],['Sudah diantar',p.delivered,p.deliveredTitles,'green'],['Cover belum diisi',p.noCoverProgress,p.noCoverProgressTitles,'red'],['Isi belum diisi',p.noIsiProgress,p.noIsiProgressTitles,'red'],['Finishing belum diisi',p.noFinishingProgress,p.noFinishingProgressTitles,'red']];$('alarms').innerHTML=cards.map(([label,copies,titles,cls])=>`<article class="alarm ${cls}"><div class="n">${fmt(copies)} eks</div><small>${label} · ${fmt(titles)} judul</small></article>`).join('')}
-function renderDistribution(data){const raw=data?.breakdown?.jenisCetak||[];const arr=Array.isArray(raw)?raw.slice(0,8):[];const vals=arr.map(x=>({label:x.label||x.name||'-',copies:metric(x.copies??x.value??x.totalCopies)})).filter(x=>x.copies>0);const total=vals.reduce((a,b)=>a+b.copies,0);$('donutTotal').textContent=fmt(total);if(!total){$('donut').style.background='#29364a';$('legend').innerHTML='<div><span>Snapshot belum memuat breakdown</span><b>—</b></div>';return}let pos=0,parts=[];vals.forEach((x,i)=>{const pct=x.copies/total*100;parts.push(`${COLORS[i%COLORS.length]} ${pos}% ${pos+pct}%`);pos+=pct});$('donut').style.background=`conic-gradient(${parts.join(',')})`;$('legend').innerHTML=vals.map((x,i)=>`<div><span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${COLORS[i%COLORS.length]};margin-right:6px"></i>${x.label}</span><b>${fmt(x.copies)}</b></div>`).join('')}
-function renderTrend(data){const arr=(Array.isArray(data?.trend)?data.trend:[]).map(x=>({label:x.label||x.date||'',v:metric(x.copies)}));if(!arr.length){$('trend').innerHTML='<div class="chartEmpty">Snapshot belum memuat trend. Deploy V25.1.40 + backfill Stage 2.</div>';return}const W=900,H=185,p=18,max=Math.max(1,...arr.map(x=>x.v)),step=(W-p*2)/Math.max(1,arr.length-1);const pts=arr.map((x,i)=>`${p+i*step},${H-p-(x.v/max)*(H-p*2)}`).join(' ');const labels=arr.filter((_,i)=>i%Math.max(1,Math.ceil(arr.length/7))===0).map((x,i)=>`<text x="${p+(arr.indexOf(x))*step}" y="${H-2}" fill="#718198" font-size="9" text-anchor="middle">${x.label}</text>`).join('');$('trend').innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="${p}" y1="${H-p}" x2="${W-p}" y2="${H-p}" stroke="#263752"/><polyline points="${pts}" fill="none" stroke="#20d5f2" stroke-width="3" vector-effect="non-scaling-stroke"/>${labels}</svg>`}
-function saveLocal(data,status,range){try{localStorage.setItem('litnus:stage2:last',JSON.stringify({data,status,range,savedAt:Date.now()}))}catch{}}
-function restoreLocal(){try{const o=JSON.parse(localStorage.getItem('litnus:stage2:last')||'null');if(!o)return;renderAll(o.data,o.status,o.range,true);$('syncState').textContent='● CACHED · REFRESHING';}catch{}}
+function renderDistribution(data){const raw=data?.breakdown?.jenisCetak||[];const arr=Array.isArray(raw)?raw.slice(0,8):[];const vals=arr.map(x=>({label:x.label||x.name||'-',copies:metric(x.copies??x.value??x.totalCopies)})).filter(x=>x.copies>0);const total=vals.reduce((a,b)=>a+b.copies,0);$('donutTotal').textContent=fmt(total);if(!total){$('donut').style.background='#29364a';$('legend').innerHTML='<div><span>Live filter belum memuat breakdown</span><b>—</b></div>';return}let pos=0,parts=[];vals.forEach((x,i)=>{const pct=x.copies/total*100;parts.push(`${COLORS[i%COLORS.length]} ${pos}% ${pos+pct}%`);pos+=pct});$('donut').style.background=`conic-gradient(${parts.join(',')})`;$('legend').innerHTML=vals.map((x,i)=>`<div><span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${COLORS[i%COLORS.length]};margin-right:6px"></i>${x.label}</span><b>${fmt(x.copies)}</b></div>`).join('')}
+function renderTrend(data){const arr=(Array.isArray(data?.trend)?data.trend:[]).map(x=>({label:x.label||x.date||'',v:metric(x.copies)}));if(!arr.length){$('trend').innerHTML='<div class="chartEmpty">Live filter belum memuat trend.</div>';return}const W=900,H=185,p=18,max=Math.max(1,...arr.map(x=>x.v)),step=(W-p*2)/Math.max(1,arr.length-1);const pts=arr.map((x,i)=>`${p+i*step},${H-p-(x.v/max)*(H-p*2)}`).join(' ');const labels=arr.filter((_,i)=>i%Math.max(1,Math.ceil(arr.length/7))===0).map((x,i)=>`<text x="${p+(arr.indexOf(x))*step}" y="${H-2}" fill="#718198" font-size="9" text-anchor="middle">${x.label}</text>`).join('');$('trend').innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="${p}" y1="${H-p}" x2="${W-p}" y2="${H-p}" stroke="#263752"/><polyline points="${pts}" fill="none" stroke="#20d5f2" stroke-width="3" vector-effect="non-scaling-stroke"/>${labels}</svg>`}
+function saveLocal(data,status,range){try{localStorage.setItem('litnus:stage21:last',JSON.stringify({data,status,range,savedAt:Date.now()}))}catch{}}
+function restoreLocal(){try{const o=JSON.parse(localStorage.getItem('litnus:stage21:last')||'null');if(!o)return;renderAll(o.data,o.status,o.range,true);$('syncState').textContent='● CACHED · REFRESHING';}catch{}}
 function renderAll(data,status,range,cached=false){renderKpis(data);renderProgress(data);renderDistribution(data);renderTrend(data);const idx=metric(status?.activeRows??status?.activeIndex?.rows);$('indexBadge').textContent='INDEX '+fmt(idx);$('rangeBadge').textContent=`${range.start} → ${range.end}`;$('footRight').innerHTML=`${cached?'Cache lokal · ':''}index ${fmt(idx)} · ${data?.meta?.generatedAt||'snapshot'}`}
-async function sync(){
+async function sync(opts={}){
  const start=$('start').value,end=$('end').value;if(!start||!end)return toast('Pilih tanggal mulai dan akhir.');
- $('refresh').disabled=true;$('syncState').textContent='● SYNCING…';$('diag').classList.remove('show');document.body.classList.add('loading');const t=performance.now();
+ $('refresh').disabled=true;$('syncState').textContent='● LIVE SYNC…';$('diag').classList.remove('show');document.body.classList.add('loading');const t=performance.now();
  try{
-  const [sr,xr]=await Promise.all([get('/api/read?action=status'),get(`/api/read?action=snapshot&start=${start}&end=${end}`)]);
-  if(!sr.ok){const er=Error(sr.data?.error||'STATUS_ERROR');er.detail={kind:'status',http:sr.status,body:sr.data};throw er}
-  if(!xr.ok){const er=Error(xr.data?.error||'SNAPSHOT_ERROR');er.detail={kind:'snapshot',http:xr.status,body:xr.data};throw er}
-  const s=unwrap(sr).payload,x=unwrap(xr),body=x.body,data=x.payload;
-  if(body?.snapshotHit===false||!data){const er=Error(body?.error||'SNAPSHOT_MISS');er.detail={kind:'snapshot',http:xr.status,body:xr.data};throw er}
-  renderAll(data,s,{start,end});saveLocal(data,s,{start,end});
-  $('syncState').textContent=`● SYNC FAST · ${fmt(Math.round(performance.now()-t))} ms`;
-  $('footLeft').innerHTML='<strong>Stage 2.0.2 Read-only</strong> · Persistent Snapshot';
+  const xr=await get(`/api/read?action=live&start=${start}&end=${end}`);
+  if(!xr.ok){const er=Error(xr.data?.error||'LIVE_ERROR');er.detail={kind:'live',http:xr.status,body:xr.data};throw er}
+  const x=unwrap(xr),body=x.body,data=x.payload;
+  if(!data||data.success===false){const er=Error(data?.error||body?.error||'LIVE_DATA_INVALID');er.detail={kind:'live',http:xr.status,body:xr.data};throw er}
+  const status={activeRows:data?.meta?.activeRows??data?.meta?.indexRows,updatedAt:data?.meta?.indexUpdatedAt};
+  renderAll(data,status,{start,end});saveLocal(data,status,{start,end});
+  window.__litnusActiveVersion=String(data?.meta?.indexUpdatedAt||'')+'|'+String(data?.meta?.indexRows||data?.meta?.activeRows||'');
+  const ms=Math.round(performance.now()-t), cacheHit=!!data?.meta?.cacheHit;
+  $('syncState').textContent=`● LIVE ${cacheHit?'CACHE':'SYNC'} · ${fmt(ms)} ms`;
+  $('footLeft').innerHTML='<strong>Stage 2.1 Read-only</strong> · LIVE ACTIVE Index';
  }catch(e){
-  const d=e.detail||{};const b=d.body||{};
-  const label=e.message==='SNAPSHOT_MISS'?'● SNAPSHOT MISS':`● SYNC ERROR ${d.http||''}`.trim();$('syncState').textContent=label;
+  const d=e.detail||{};const b=d.body||{};$('syncState').textContent=`● LIVE ERROR ${d.http||''}`.trim();
   const diag={error:e.message,httpStatus:d.http||null,kind:d.kind||null,upstreamHttpStatus:b.upstreamHttpStatus??null,bodyHttpStatus:b.bodyHttpStatus??null,attempts:b.attempts??null,contentType:b.contentType??null,elapsedMs:b.elapsedMs??null,message:b.message??null,preview:b.preview??null};
-  $('diag').textContent=JSON.stringify(diag,null,2);$('diag').classList.add('show');
-  // Keep last-known-good screen intact; do not clear KPI/panels on failed refresh.
-  toast(e.message==='SNAPSHOT_MISS'?'Snapshot untuk range ini belum tersedia. Data terakhir tetap ditampilkan.':'Refresh gagal; data terakhir tetap ditampilkan. Lihat diagnostic.');
+  $('diag').textContent=JSON.stringify(diag,null,2);$('diag').classList.add('show');toast('Live refresh gagal; data terakhir tetap ditampilkan.');
  }finally{$('refresh').disabled=false;document.body.classList.remove('loading')}
 }
-function quickRange(type){const now=new Date();if(type==='today')return setRange(iso(now),iso(now));if(type==='yesterday'){const d=new Date(now);d.setDate(d.getDate()-1);return setRange(iso(d),iso(d))}if(type==='month'){const r=monthRange(now);return setRange(r.start,r.end)}if(type==='prevmonth'){const d=new Date(now.getFullYear(),now.getMonth()-1,1),r=monthRange(d);return setRange(r.start,r.end)}if(type==='year')return setRange(`${now.getFullYear()}-01-01`,`${now.getFullYear()}-12-31`);const days=Number(type);if(days){const d=new Date(now);d.setDate(d.getDate()-(days-1));return setRange(iso(d),iso(now))}}
-document.querySelectorAll('[data-range]').forEach(b=>b.addEventListener('click',()=>quickRange(b.dataset.range)));$('apply').addEventListener('click',sync);$('refresh').addEventListener('click',sync);$('start').addEventListener('change',updateMeta);$('end').addEventListener('change',updateMeta);
-(async()=>{initRange();restoreLocal();if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/service-worker.js')}catch{}try{const h=await get('/api/health');if(h.data?.upstreamConfigured)$('syncState').textContent='● READY · READ ONLY'}catch{}sync()})();
+function quickRange(type){const now=new Date();let r=null;if(type==='today')r={start:iso(now),end:iso(now)};else if(type==='yesterday'){const d=new Date(now);d.setDate(d.getDate()-1);r={start:iso(d),end:iso(d)}}else if(type==='month')r=monthRange(now);else if(type==='prevmonth'){const d=new Date(now.getFullYear(),now.getMonth()-1,1);r=monthRange(d)}else if(type==='year')r={start:`${now.getFullYear()}-01-01`,end:`${now.getFullYear()}-12-31`};else{const days=Number(type);if(days){const d=new Date(now);d.setDate(d.getDate()-(days-1));r={start:iso(d),end:iso(now)}}}if(r){setRange(r.start,r.end);sync({reason:'quick-filter'})}}
+async function checkLiveVersion(){
+ if(document.hidden)return;
+ try{
+  const sr=await get('/api/read?action=status');if(!sr.ok)return;
+  const s=unwrap(sr).payload||{};const v=String(s.updatedAt||s.activeIndex?.updatedAt||s.heartbeatAt||'')+'|'+String(s.activeRows||s.activeIndex?.rows||'');
+  if(window.__litnusActiveVersion&&v&&v!==window.__litnusActiveVersion)sync({reason:'index-changed'});
+ }catch{}
+}
+document.querySelectorAll('[data-range]').forEach(b=>b.addEventListener('click',()=>quickRange(b.dataset.range)));$('apply').addEventListener('click',()=>sync({reason:'apply'}));$('refresh').addEventListener('click',()=>sync({reason:'manual'}));$('start').addEventListener('change',updateMeta);$('end').addEventListener('change',updateMeta);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkLiveVersion()});
+(async()=>{initRange();restoreLocal();if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/service-worker.js')}catch{}try{const h=await get('/api/health');if(h.data?.upstreamConfigured)$('syncState').textContent='● READY · LIVE READ ONLY'}catch{}await sync({reason:'boot'});setInterval(checkLiveVersion,45000)})();
+
 </script>
 </body></html>

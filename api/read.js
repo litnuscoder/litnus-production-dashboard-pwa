@@ -1,11 +1,11 @@
-const ALLOWED=new Set(['status','config','snapshot','dashboard']);
+const ALLOWED=new Set(['status','config','snapshot','live','dashboard']);
 
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 
 async function fetchUpstream(url, action){
   const started=Date.now();
   const controller=new AbortController();
-  const timeoutMs=action==='snapshot'?45000:180000;
+  const timeoutMs=(action==='snapshot'||action==='live')?60000:180000;
   const timer=setTimeout(()=>controller.abort(),timeoutMs);
   try{
     const r=await fetch(url,{redirect:'follow',signal:controller.signal,headers:{'Accept':'application/json'}});
@@ -37,7 +37,7 @@ module.exports=async function handler(req,res){
   upstream.searchParams.set('action',action);
   upstream.searchParams.set('token',TOKEN);
 
-  if(action==='dashboard' || action==='snapshot'){
+  if(action==='dashboard' || action==='snapshot' || action==='live'){
     const start=u.searchParams.get('start')||'';
     const end=u.searchParams.get('end')||'';
     if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||!/^\d{4}-\d{2}-\d{2}$/.test(end)){
@@ -51,7 +51,7 @@ module.exports=async function handler(req,res){
   let attempts=0;
   let last=null;
   try{
-    const maxAttempts=action==='snapshot'?2:1;
+    const maxAttempts=(action==='snapshot'||action==='live')?2:1;
     while(attempts<maxAttempts){
       attempts++;
       last=await fetchUpstream(upstream,action);
@@ -60,7 +60,7 @@ module.exports=async function handler(req,res){
         const bodyStatus=Number(body?.httpStatus||200);
         const ok=r.ok && bodyStatus>=200 && bodyStatus<300 && body?.ok!==false;
         // Retry only transient upstream/server failures on snapshot.
-        if(action==='snapshot' && attempts<maxAttempts && (!ok && (r.status>=500 || bodyStatus>=500))){
+        if((action==='snapshot'||action==='live') && attempts<maxAttempts && (!ok && (r.status>=500 || bodyStatus>=500))){
           await sleep(700); continue;
         }
         const status=ok?200:(bodyStatus||502);
@@ -79,7 +79,7 @@ module.exports=async function handler(req,res){
         });
       }
       // Non JSON can be a transient Apps Script HTML error/login/cold-start page.
-      if(action==='snapshot' && attempts<maxAttempts){await sleep(700);continue;}
+      if((action==='snapshot'||action==='live') && attempts<maxAttempts){await sleep(700);continue;}
       return res.status(502).json({
         ok:false,action,attempts,error:'UPSTREAM_NON_JSON',
         upstreamHttpStatus:r.status,contentType:ct,
