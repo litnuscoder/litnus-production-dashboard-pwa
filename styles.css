@@ -32,3 +32,26 @@ button,input,select,textarea{font:inherit}
 .toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;pointer-events:none;padding:10px 14px;border-radius:10px;background:#dfffe7;color:#092312;font-weight:800;font-size:11px;transition:.22s;z-index:99}.toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:1000px){.workspace{grid-template-columns:1fr}.right-column{position:static}.hero-copy{align-items:flex-start;flex-direction:column}.hero-badges{justify-content:flex-start}.privacy-pill{display:none}.ai-launch-card{flex-direction:column;align-items:flex-start}}
 @media(max-width:640px){.topbar{height:66px;padding:0 16px}.shell{padding:34px 14px 60px}.hero-copy h1{font-size:38px}.form-panel,.spec-panel,.output-panel{padding:17px}.form-grid.two{grid-template-columns:1fr}.top-actions .btn{padding:8px 10px}.spec-strip{grid-template-columns:1fr}.wrap-preview{height:180px}.panel-head{gap:10px}.output-actions{flex-wrap:wrap;justify-content:flex-end}.class-medallion{width:62px;height:62px}.class-medallion b{font-size:18px}}
+
+[hidden]{display:none!important}
+.empty-output[hidden],#jsonOutput[hidden],#colorFields[hidden]{display:none!important}
+.select-wrap.has-custom-select::after{display:none!important}
+.native-select-proxy{position:absolute!important;left:8px!important;bottom:8px!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important;border:0!important;padding:0!important}
+.custom-select{position:relative;width:100%;z-index:4}
+.custom-select.is-open{z-index:90}
+.custom-select-trigger{width:100%;min-height:46px;border:1px solid #294735;background:linear-gradient(180deg,#0a1810,#08130d);color:var(--text);border-radius:12px;padding:12px 42px 12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;cursor:pointer;outline:none;transition:.18s;box-shadow:inset 0 1px 0 rgba(255,255,255,.015)}
+.custom-select-trigger:hover{border-color:#386349;background:#0b1c13}
+.custom-select-trigger:focus-visible,.custom-select.is-open .custom-select-trigger{border-color:var(--neon2);box-shadow:0 0 0 3px rgba(101,255,143,.08),0 12px 30px rgba(0,0,0,.18)}
+.custom-select-label{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:600;color:#e9f9ee}
+.custom-select-chevron{position:absolute;right:13px;top:50%;width:18px;height:18px;transform:translateY(-50%);background-image:var(--select-arrow);background-repeat:no-repeat;background-size:18px 18px;transition:transform .18s}
+.custom-select.is-open .custom-select-chevron{transform:translateY(-50%) rotate(180deg)}
+.custom-select-menu{position:absolute;left:0;right:0;top:calc(100% + 7px);max-height:310px;overflow:auto;padding:6px;background:rgba(7,20,13,.985);border:1px solid #2c5138;border-radius:13px;box-shadow:0 22px 55px rgba(0,0,0,.58),0 0 0 1px rgba(101,255,143,.035);opacity:0;visibility:hidden;transform:translateY(-5px) scale(.99);transform-origin:top;transition:opacity .14s,transform .14s,visibility .14s;backdrop-filter:blur(18px)}
+.custom-select.is-open .custom-select-menu{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.custom-select-option{width:100%;border:0;background:transparent;color:#dceee2;border-radius:9px;padding:10px 11px;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;cursor:pointer;font-size:13px;line-height:1.35;transition:.12s}
+.custom-select-option:hover,.custom-select-option:focus-visible{background:#102d1d;color:#fff;outline:none}
+.custom-select-option.is-selected{background:linear-gradient(90deg,rgba(101,255,143,.15),rgba(101,255,143,.055));color:var(--neon)}
+.custom-select-check{opacity:0;color:var(--neon);font-weight:900}.custom-select-option.is-selected .custom-select-check{opacity:1}
+.custom-select-option:disabled{opacity:.35;cursor:not-allowed}
+.custom-select-menu::-webkit-scrollbar{width:9px}.custom-select-menu::-webkit-scrollbar-track{background:#08130d;border-radius:999px}.custom-select-menu::-webkit-scrollbar-thumb{background:#245338;border:2px solid #08130d;border-radius:999px}.custom-select-menu::-webkit-scrollbar-thumb:hover{background:#347149}
+.output-panel.has-output .empty-output{display:none!important}.output-panel.has-output #jsonOutput{display:block!important}
+.form-panel{overflow:visible}
