@@ -1,112 +1,152 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1324">
-<link rel="manifest" href="/manifest.webmanifest">
-<title>Litnus Production Dashboard</title>
-<style>
-:root{color-scheme:dark;--bg:#070d18;--panel:#0e1728;--panel2:#0b1423;--line:#263752;--text:#f4f7fb;--muted:#8392aa;--cyan:#20d5f2;--blue:#3078ff;--green:#2bd492;--amber:#ffb51f;--red:#ff657d;--violet:#b56cff}
-*{box-sizing:border-box}html,body{min-height:100%;background:var(--bg)}body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:radial-gradient(circle at 15% -10%,#182943 0,#07101e 36%,#060b14 70%)}button,input{font:inherit}.app{max-width:1660px;margin:auto;padding:18px}.card,.bar,.filter,.section{background:rgba(14,23,40,.96);border:1px solid var(--line);border-radius:16px}.bar{display:grid;grid-template-columns:minmax(300px,1fr) auto minmax(420px,1fr);align-items:center;gap:14px;padding:12px 14px}.brand{display:flex;align-items:center;gap:12px}.logo{width:39px;height:39px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#2399ff,#18d2f1);box-shadow:0 0 28px #129fe733;font-size:20px}.brand h1{font-size:20px;margin:0;font-weight:950}.brand p{margin:2px 0 0;color:var(--muted);font-size:11px}.tabs{display:flex;gap:8px}.btn,.tab{border:1px solid var(--line);background:#101a2b;color:#e9eef7;border-radius:10px;height:38px;padding:0 14px;font-weight:800;cursor:pointer}.tab.active,.btn.primary{border-color:#4c8dff;background:#1f5ed1}.statusArea{display:flex;justify-content:flex-end;gap:10px;align-items:center}.pill{min-width:260px;height:38px;border-radius:999px;border:1px solid #6b5420;background:#201d15;color:#ffd56a;display:grid;place-items:center;font-size:11px;font-weight:900}.online{height:38px;border-radius:999px;border:1px solid var(--line);padding:0 16px;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:900}.online b{color:var(--cyan)}.filter{margin-top:14px;padding:14px;display:grid;grid-template-columns:minmax(240px,1fr) 22px minmax(240px,1fr) auto auto;gap:10px;align-items:end}.field label{display:block;color:var(--muted);font-size:10px;font-weight:850;margin-bottom:6px;letter-spacing:.05em}.field input{width:100%;height:42px;border-radius:10px;border:1px solid var(--line);background:#0a1220;color:white;padding:0 12px}.arrow{height:42px;display:grid;place-items:center;color:var(--cyan);font-size:20px}.quick{display:flex;gap:6px;flex-wrap:wrap}.quick .btn{height:34px;padding:0 10px;font-size:10px}.filterMeta{grid-column:1/-1;color:var(--muted);font-size:10px}.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px}.card{padding:14px;min-height:112px;position:relative;overflow:hidden}.card:after{content:"";position:absolute;width:74px;height:74px;border-radius:50%;right:-20px;top:-26px;background:#4f77ba1a}.klabel{font-size:13px;color:#e8edf5}.kvalue{font-size:28px;font-weight:950;margin:7px 0 3px}.kmeta{font-size:9px;color:var(--muted)}.layout{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.section{overflow:hidden}.sectionHead{height:52px;border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;justify-content:space-between}.sectionHead h2{font-size:12px;margin:0;font-weight:950;letter-spacing:.04em}.sectionHead p{font-size:9px;color:var(--muted);margin:3px 0 0}.sectionBody{padding:14px}.goodBadge{border:1px solid #1e6a57;background:#0d2b25;color:#63e6b6;font-size:9px;font-weight:900;border-radius:999px;padding:6px 9px}.tower{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stage{border:1px solid var(--line);border-radius:12px;padding:11px;background:#0b1423}.stageTop{display:flex;justify-content:space-between;align-items:end;gap:8px}.stageName{font-size:10px;font-weight:900}.stageMain{text-align:right;color:var(--cyan);font-weight:950;font-size:20px}.stageMain span{display:block;font-size:9px}.miniBar{height:5px;background:#1e2b40;border-radius:999px;margin:9px 0;overflow:hidden}.miniBar i{display:block;height:100%;background:var(--cyan);border-radius:inherit}.rows{display:grid;gap:6px}.row{display:flex;justify-content:space-between;gap:8px;background:#101a2c;border-radius:7px;padding:6px 7px;font-size:9px}.row b{font-size:9px}.alarmGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.alarm{border:1px solid var(--line);border-radius:11px;padding:12px;background:#0b1423}.alarm .n{font-size:22px;font-weight:950;color:var(--amber)}.alarm.green .n{color:var(--green)}.alarm.red .n{color:var(--red)}.alarm small{color:var(--muted);font-size:9px}.lower{display:grid;grid-template-columns:.7fr 1.3fr;gap:12px;margin-top:12px}.distribution{display:grid;grid-template-columns:170px 1fr;gap:16px;align-items:center}.donut{width:150px;height:150px;border-radius:50%;background:conic-gradient(#38465d 0 100%);position:relative;margin:auto}.donut:after{content:"";position:absolute;inset:25px;background:#0e1728;border-radius:50%}.donutCenter{position:absolute;inset:0;display:grid;place-items:center;z-index:1;text-align:center;font-size:22px;font-weight:950}.donutCenter span{display:block;color:var(--muted);font-size:8px;font-weight:700}.legend{display:grid;gap:7px}.legend div{display:flex;justify-content:space-between;gap:8px;font-size:10px}.legend b{font-size:10px}.chartWrap{height:210px;position:relative}.chartWrap svg{width:100%;height:100%;overflow:visible}.chartEmpty{height:100%;display:grid;place-items:center;color:var(--muted);font-size:11px}.syncFooter{display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--muted);font-size:9px;margin-top:12px;padding:0 4px}.syncFooter strong{color:var(--green)}.loading{opacity:.55}.toast{position:fixed;right:18px;bottom:18px;background:#101a2b;border:1px solid var(--line);padding:11px 14px;border-radius:11px;font-size:11px;box-shadow:0 10px 40px #0007;display:none}.toast.show{display:block}.diag{display:none;margin-top:10px;border:1px solid #5b3340;background:#1b1017;color:#ffd2dc;border-radius:10px;padding:10px 12px;font:10px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word}.diag.show{display:block}
-@media(max-width:1050px){.bar{grid-template-columns:1fr auto}.statusArea{grid-column:1/-1;justify-content:flex-start}.filter{grid-template-columns:1fr 22px 1fr}.quick,.filter>.btn.primary{grid-column:1/-1}.kpis{grid-template-columns:repeat(3,1fr)}.layout,.lower{grid-template-columns:1fr}.tower{grid-template-columns:1fr}.alarmGrid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:620px){.app{padding:8px}.bar{grid-template-columns:1fr}.tabs{display:none}.statusArea{display:grid;grid-template-columns:1fr 1fr}.pill{min-width:0;grid-column:1/-1}.filter{grid-template-columns:1fr}.arrow{display:none}.quick{display:grid;grid-template-columns:repeat(3,1fr)}.quick .btn{padding:0 5px}.kpis{grid-template-columns:repeat(2,1fr)}.kvalue{font-size:23px}.alarmGrid{grid-template-columns:1fr 1fr}.distribution{grid-template-columns:1fr}.sectionBody{padding:10px}}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#07110b" />
+  <meta name="description" content="Generator JSON prompt cover buku sekolah A4 full-wrap dengan layout seragam dan perhitungan punggung otomatis." />
+  <title>CoverPrompt — Generator Cover Buku Sekolah</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-<main class="app">
-<header class="bar">
-  <div class="brand"><div class="logo">⛵</div><div><h1>LITNUS PRODUCTION DASHBOARD</h1><p>Melihat Lebih Cepat. Bertindak Lebih Tepat.</p></div></div>
-  <nav class="tabs"><button class="tab">📚 Input Buku</button><button class="tab active">📊 Dashboard</button></nav>
-  <div class="statusArea"><div id="syncState" class="pill">● READY · READ ONLY</div><div class="online"><span>👥</span><b>READ ONLY</b></div><button id="refresh" class="btn primary">↻ Refresh Data</button></div>
-</header>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="CoverPrompt beranda">
+      <span class="brand-mark">CP</span>
+      <span>
+        <strong>CoverPrompt</strong>
+        <small>School Book System</small>
+      </span>
+    </a>
+    <div class="top-actions">
+      <span class="privacy-pill"><span class="dot"></span> Tidak menyimpan isi formulir</span>
+      <button class="btn btn-ghost" id="helpBtn" type="button">Petunjuk</button>
+    </div>
+  </header>
 
-<section class="filter">
-  <div class="field"><label>TANGGAL MULAI</label><input id="start" type="date"></div>
-  <div class="arrow">→</div>
-  <div class="field"><label>TANGGAL AKHIR</label><input id="end" type="date"></div>
-  <div class="quick">
-    <button class="btn" data-range="today">Hari ini</button><button class="btn" data-range="yesterday">Kemarin</button><button class="btn" data-range="2">2 Hari Terakhir</button><button class="btn" data-range="7">7 Hari</button><button class="btn" data-range="month">Bulan ini</button><button class="btn" data-range="prevmonth">Bulan lalu</button><button class="btn" data-range="year">Tahun ini</button>
-  </div>
-  <button id="apply" class="btn primary">Terapkan</button>
-  <div id="filterMeta" class="filterMeta">Mode RANGE · snapshot read-only</div><div id="diag" class="diag"></div>
-</section>
+  <main id="top" class="shell">
+    <section class="hero-copy">
+      <div>
+        <span class="eyebrow">LITNUS • TEMPLATE A4 FULL WRAP</span>
+        <h1>Prompt cover seragam,<br><span>tanpa desain yang liar.</span></h1>
+        <p>Isi data buku, unggah referensi logo, lalu aplikasi menghitung punggung dan menyusun satu JSON prompt yang siap ditempel ke AI generator.</p>
+      </div>
+      <div class="hero-badges" aria-label="Keunggulan">
+        <span>Bleed 5 mm</span><span>Safe margin 15 mm</span><span>Spine otomatis</span><span>Anti AI slop</span>
+      </div>
+    </section>
 
-<section class="kpis">
-  <article class="card"><div class="klabel">Naskah Masuk</div><div id="kOrders" class="kvalue">—</div><div class="kmeta">order pada periode aktif</div></article>
-  <article class="card"><div class="klabel">Total Eksemplar</div><div id="kCopies" class="kvalue">—</div><div class="kmeta">jumlah cetak</div></article>
-  <article class="card"><div class="klabel">Total Halaman</div><div id="kPages" class="kvalue">—</div><div class="kmeta">total halaman cetak</div></article>
-  <article class="card"><div class="klabel">Selesai Tanggal Dipilih</div><div id="kDone" class="kvalue">—</div><div id="kDoneMeta" class="kmeta">judul · eksemplar</div></article>
-  <article class="card"><div class="klabel">WIP Aktif</div><div id="kWip" class="kvalue">—</div><div id="kWipMeta" class="kmeta">judul · eksemplar</div></article>
-  <article class="card"><div class="klabel">WIP Current</div><div id="kCurrent" class="kvalue">—</div><div id="kCurrentMeta" class="kmeta">judul · eksemplar</div></article>
-</section>
+    <div class="workspace">
+      <section class="panel form-panel" aria-labelledby="formTitle">
+        <div class="panel-head">
+          <div><span class="step">01</span><h2 id="formTitle">Informasi Buku</h2></div>
+          <button class="text-btn" id="sampleBtn" type="button">Isi contoh</button>
+        </div>
 
-<div class="layout">
-<section class="section"><div class="sectionHead"><div><h2>CONTROL TOWER · PROGRES PRODUKSI</h2><p>Angka biru = eksemplar yang sedang dalam progres · selesai tetap ditampilkan di detail</p></div><span id="towerBadge" class="goodBadge">—</span></div><div class="sectionBody"><div id="tower" class="tower"></div></div></section>
-<section class="section"><div class="sectionHead"><div><h2>ALARM PRODUKSI</h2><p>Titik yang perlu diperhatikan operator</p></div><span class="goodBadge">LIVE SNAPSHOT</span></div><div class="sectionBody"><div id="alarms" class="alarmGrid"></div></div></section>
-</div>
+        <form id="coverForm" novalidate>
+          <div class="form-grid two">
+            <label class="field"><span>Mata pelajaran <b>*</b></span><input name="subject" id="subject" placeholder="Contoh: Ekonomi" required maxlength="120" /></label>
+            <label class="field"><span>Judul buku <b>*</b></span><input name="title" id="title" placeholder="Contoh: Ekonomi" required maxlength="180" /></label>
+          </div>
+          <label class="field"><span>Subjudul <em>opsional</em></span><input name="subtitle" id="subtitle" placeholder="Contoh: Modul Pembelajaran" maxlength="220" /></label>
+          <div class="form-grid two">
+            <label class="field"><span>Nama penulis <b>*</b></span><input name="author" id="author" placeholder="Nama lengkap" required maxlength="220" /></label>
+            <label class="field"><span>Jumlah halaman <b>*</b></span><input name="pages" id="pages" type="number" min="1" max="3000" step="1" placeholder="200" required /></label>
+          </div>
+          <div class="form-grid two">
+            <label class="field"><span>Jenjang <b>*</b></span>
+              <select name="level" id="level" required>
+                <option value="">Pilih jenjang</option><option>SD/MI</option><option>SMP/MTs</option><option>SMA/MA</option><option>SMK/MAK</option><option value="Lainnya">Lainnya</option>
+              </select>
+            </label>
+            <label class="field"><span>Kelas <b>*</b></span><input name="className" id="className" placeholder="Contoh: X" required maxlength="30" /></label>
+          </div>
 
-<div class="lower">
-<section class="section"><div class="sectionHead"><div><h2>DISTRIBUSI JENIS CETAK</h2><p>Komposisi berdasarkan jumlah eksemplar</p></div><span id="rangeBadge" class="goodBadge">—</span></div><div class="sectionBody distribution"><div class="donut" id="donut"><div class="donutCenter"><div><span id="donutTotal">0</span><span>EKSEMPLAR</span></div></div></div><div id="legend" class="legend"></div></div></section>
-<section class="section"><div class="sectionHead"><div><h2>TREND PRODUKSI HARIAN</h2><p>Eksemplar selesai per tanggal</p></div><span id="indexBadge" class="goodBadge">INDEX —</span></div><div class="sectionBody"><div id="trend" class="chartWrap"></div></div></section>
-</div>
+          <div class="divider"></div>
+          <div class="section-title"><span class="step">02</span><div><h3>Identitas & Logo</h3><p>Semua logo akan ditempatkan di kanan atas cover depan.</p></div></div>
+          <div class="form-grid two">
+            <label class="field"><span>Nama sekolah <em>opsional</em></span><input name="school" id="school" placeholder="Nama sekolah" maxlength="180" /></label>
+            <label class="field"><span>Nama yayasan <em>opsional</em></span><input name="foundation" id="foundation" placeholder="Nama yayasan" maxlength="180" /></label>
+          </div>
 
-<div class="syncFooter"><span id="footLeft">Stage 2.0.2 · Diagnostic Read-only UI</span><span id="footRight">Belum sinkron</span></div>
-</main>
-<div id="toast" class="toast"></div>
-<script>
-const $=id=>document.getElementById(id), fmt=n=>new Intl.NumberFormat('id-ID').format(Number(n||0));
-const COLORS=['#20d5f2','#2bd492','#ffb51f','#ff657d','#b56cff','#4e83ff','#7fd36b','#ff8f45'];
-function iso(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
-function monthRange(d=new Date()){const y=d.getFullYear(),m=d.getMonth();return{start:iso(new Date(y,m,1)),end:iso(new Date(y,m+1,0))}}
-function setRange(start,end){$('start').value=start;$('end').value=end;updateMeta()}
-function updateMeta(){$('filterMeta').textContent=`Mode RANGE · ${$('start').value||'—'} → ${$('end').value||'—'} · PWA membaca ACTIVE index secara live`}
-function initRange(){const r=monthRange();setRange(r.start,r.end)}
-function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2600)}
-async function get(url){const r=await fetch(url,{cache:'no-store'});let d={};try{d=await r.json()}catch{}return{ok:r.ok,status:r.status,data:d}}
-function unwrap(res){const g=res?.data||{};const body=(g.data&&typeof g.data==='object')?g.data:g;const payload=(body.data&&typeof body.data==='object')?body.data:body;return{gateway:g,body,payload}}
-function metric(v){return Number(v||0)}
-function renderKpis(data){const s=data?.summary||{},a=data?.achievement||{};$('kOrders').textContent=fmt(s.naskahMasuk??s.totalOrder);$('kCopies').textContent=fmt(s.totalEksemplar);$('kPages').textContent=fmt(s.totalHlmCetak);$('kDone').textContent=fmt(s.selesaiEksemplar??a.completedCopies);$('kDoneMeta').textContent=`${fmt(s.selesaiJudul??a.completedTitles)} judul · ${fmt(s.selesaiEksemplar??a.completedCopies)} eksemplar`;$('kWip').textContent=fmt(s.wipEksemplar);$('kWipMeta').textContent=`${fmt(s.wipJudul)} judul · ${fmt(s.wipEksemplar)} eksemplar`;$('kCurrent').textContent=fmt(s.wipCurrentEksemplar);$('kCurrentMeta').textContent=`${fmt(s.wipCurrentJudul)} judul · ${fmt(s.wipCurrentEksemplar)} eksemplar`;$('towerBadge').textContent=`${fmt(s.totalEksemplar)} eks · ${fmt(s.naskahMasuk??s.totalOrder)} judul`}
-function listRows(arr){return (Array.isArray(arr)?arr:[]).map(x=>`<div class="row"><b>${x.label||'-'}</b><span>${fmt(x.titles)} naskah · ${fmt(x.copies)} eks</span></div>`).join('')||'<div class="row"><b>Belum ada data</b><span>—</span></div>'}
-function stageCard(name,active,titles,list){return `<article class="stage"><div class="stageTop"><div class="stageName">${name}</div><div class="stageMain">${fmt(active)} eks<span>${fmt(titles)} judul</span></div></div><div class="miniBar"><i style="width:${Math.min(100,Math.max(2,active?14:2))}%"></i></div><div class="rows">${listRows(list)}</div></article>`}
-function renderProgress(data){const p=data?.progress||{};$('tower').innerHTML=stageCard('01 · COVER',p.coverActive,p.coverActiveTitles,p.cover)+stageCard('02 · ISI',p.isiActive,p.isiActiveTitles,p.isi)+stageCard('03 · FINISHING',p.finishingActive,p.finishingActiveTitles,p.finishing);const cards=[['Cover dalam proses',p.coverActive,p.coverActiveTitles,''],['Isi dalam proses',p.isiActive,p.isiActiveTitles,''],['Finishing dalam proses',p.finishingActive,p.finishingActiveTitles,''],['Siap diambil',p.readyPickup,p.readyPickupTitles,'green'],['Sudah diantar',p.delivered,p.deliveredTitles,'green'],['Cover belum diisi',p.noCoverProgress,p.noCoverProgressTitles,'red'],['Isi belum diisi',p.noIsiProgress,p.noIsiProgressTitles,'red'],['Finishing belum diisi',p.noFinishingProgress,p.noFinishingProgressTitles,'red']];$('alarms').innerHTML=cards.map(([label,copies,titles,cls])=>`<article class="alarm ${cls}"><div class="n">${fmt(copies)} eks</div><small>${label} · ${fmt(titles)} judul</small></article>`).join('')}
-function renderDistribution(data){const raw=data?.breakdown?.jenisCetak||[];const arr=Array.isArray(raw)?raw.slice(0,8):[];const vals=arr.map(x=>({label:x.label||x.name||'-',copies:metric(x.copies??x.value??x.totalCopies)})).filter(x=>x.copies>0);const total=vals.reduce((a,b)=>a+b.copies,0);$('donutTotal').textContent=fmt(total);if(!total){$('donut').style.background='#29364a';$('legend').innerHTML='<div><span>Live filter belum memuat breakdown</span><b>—</b></div>';return}let pos=0,parts=[];vals.forEach((x,i)=>{const pct=x.copies/total*100;parts.push(`${COLORS[i%COLORS.length]} ${pos}% ${pos+pct}%`);pos+=pct});$('donut').style.background=`conic-gradient(${parts.join(',')})`;$('legend').innerHTML=vals.map((x,i)=>`<div><span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${COLORS[i%COLORS.length]};margin-right:6px"></i>${x.label}</span><b>${fmt(x.copies)}</b></div>`).join('')}
-function renderTrend(data){const arr=(Array.isArray(data?.trend)?data.trend:[]).map(x=>({label:x.label||x.date||'',v:metric(x.copies)}));if(!arr.length){$('trend').innerHTML='<div class="chartEmpty">Live filter belum memuat trend.</div>';return}const W=900,H=185,p=18,max=Math.max(1,...arr.map(x=>x.v)),step=(W-p*2)/Math.max(1,arr.length-1);const pts=arr.map((x,i)=>`${p+i*step},${H-p-(x.v/max)*(H-p*2)}`).join(' ');const labels=arr.filter((_,i)=>i%Math.max(1,Math.ceil(arr.length/7))===0).map((x,i)=>`<text x="${p+(arr.indexOf(x))*step}" y="${H-2}" fill="#718198" font-size="9" text-anchor="middle">${x.label}</text>`).join('');$('trend').innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="${p}" y1="${H-p}" x2="${W-p}" y2="${H-p}" stroke="#263752"/><polyline points="${pts}" fill="none" stroke="#20d5f2" stroke-width="3" vector-effect="non-scaling-stroke"/>${labels}</svg>`}
-function saveLocal(data,status,range){try{localStorage.setItem('litnus:stage21:last',JSON.stringify({data,status,range,savedAt:Date.now()}))}catch{}}
-function restoreLocal(){try{const o=JSON.parse(localStorage.getItem('litnus:stage21:last')||'null');if(!o)return;renderAll(o.data,o.status,o.range,true);$('syncState').textContent='● CACHED · REFRESHING';}catch{}}
-function renderAll(data,status,range,cached=false){renderKpis(data);renderProgress(data);renderDistribution(data);renderTrend(data);const idx=metric(status?.activeRows??status?.activeIndex?.rows);$('indexBadge').textContent='INDEX '+fmt(idx);$('rangeBadge').textContent=`${range.start} → ${range.end}`;$('footRight').innerHTML=`${cached?'Cache lokal · ':''}index ${fmt(idx)} · ${data?.meta?.generatedAt||'snapshot'}`}
-async function sync(opts={}){
- const start=$('start').value,end=$('end').value;if(!start||!end)return toast('Pilih tanggal mulai dan akhir.');
- $('refresh').disabled=true;$('syncState').textContent='● LIVE SYNC…';$('diag').classList.remove('show');document.body.classList.add('loading');const t=performance.now();
- try{
-  const xr=await get(`/api/read?action=live&start=${start}&end=${end}`);
-  if(!xr.ok){const er=Error(xr.data?.error||'LIVE_ERROR');er.detail={kind:'live',http:xr.status,body:xr.data};throw er}
-  const x=unwrap(xr),body=x.body,data=x.payload;
-  if(!data||data.success===false){const er=Error(data?.error||body?.error||'LIVE_DATA_INVALID');er.detail={kind:'live',http:xr.status,body:xr.data};throw er}
-  const status={activeRows:data?.meta?.activeRows??data?.meta?.indexRows,updatedAt:data?.meta?.indexUpdatedAt};
-  renderAll(data,status,{start,end});saveLocal(data,status,{start,end});
-  window.__litnusActiveVersion=String(data?.meta?.indexUpdatedAt||'')+'|'+String(data?.meta?.indexRows||data?.meta?.activeRows||'');
-  const ms=Math.round(performance.now()-t), cacheHit=!!data?.meta?.cacheHit;
-  $('syncState').textContent=`● LIVE ${cacheHit?'CACHE':'SYNC'} · ${fmt(ms)} ms`;
-  $('footLeft').innerHTML='<strong>Stage 2.1 Read-only</strong> · LIVE ACTIVE Index';
- }catch(e){
-  const d=e.detail||{};const b=d.body||{};$('syncState').textContent=`● LIVE ERROR ${d.http||''}`.trim();
-  const diag={error:e.message,httpStatus:d.http||null,kind:d.kind||null,upstreamHttpStatus:b.upstreamHttpStatus??null,bodyHttpStatus:b.bodyHttpStatus??null,attempts:b.attempts??null,contentType:b.contentType??null,elapsedMs:b.elapsedMs??null,message:b.message??null,preview:b.preview??null};
-  $('diag').textContent=JSON.stringify(diag,null,2);$('diag').classList.add('show');toast('Live refresh gagal; data terakhir tetap ditampilkan.');
- }finally{$('refresh').disabled=false;document.body.classList.remove('loading')}
-}
-function quickRange(type){const now=new Date();let r=null;if(type==='today')r={start:iso(now),end:iso(now)};else if(type==='yesterday'){const d=new Date(now);d.setDate(d.getDate()-1);r={start:iso(d),end:iso(d)}}else if(type==='month')r=monthRange(now);else if(type==='prevmonth'){const d=new Date(now.getFullYear(),now.getMonth()-1,1);r=monthRange(d)}else if(type==='year')r={start:`${now.getFullYear()}-01-01`,end:`${now.getFullYear()}-12-31`};else{const days=Number(type);if(days){const d=new Date(now);d.setDate(d.getDate()-(days-1));r={start:iso(d),end:iso(now)}}}if(r){setRange(r.start,r.end);sync({reason:'quick-filter'})}}
-async function checkLiveVersion(){
- if(document.hidden)return;
- try{
-  const sr=await get('/api/read?action=status');if(!sr.ok)return;
-  const s=unwrap(sr).payload||{};const v=String(s.updatedAt||s.activeIndex?.updatedAt||s.heartbeatAt||'')+'|'+String(s.activeRows||s.activeIndex?.rows||'');
-  if(window.__litnusActiveVersion&&v&&v!==window.__litnusActiveVersion)sync({reason:'index-changed'});
- }catch{}
-}
-document.querySelectorAll('[data-range]').forEach(b=>b.addEventListener('click',()=>quickRange(b.dataset.range)));$('apply').addEventListener('click',()=>sync({reason:'apply'}));$('refresh').addEventListener('click',()=>sync({reason:'manual'}));$('start').addEventListener('change',updateMeta);$('end').addEventListener('change',updateMeta);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkLiveVersion()});
-(async()=>{initRange();restoreLocal();if('serviceWorker'in navigator)try{await navigator.serviceWorker.register('/service-worker.js')}catch{}try{const h=await get('/api/health');if(h.data?.upstreamConfigured)$('syncState').textContent='● READY · LIVE READ ONLY'}catch{}await sync({reason:'boot'});setInterval(checkLiveVersion,45000)})();
+          <label class="upload" id="uploadArea">
+            <input id="logos" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" multiple hidden />
+            <span class="upload-icon">＋</span>
+            <span><strong>Tambahkan logo referensi</strong><small>PNG, JPG, WEBP, atau SVG • maksimal 4 file</small></span>
+            <button type="button" class="btn btn-soft" id="chooseLogoBtn">Pilih file</button>
+          </label>
+          <div id="logoPreview" class="logo-preview" aria-live="polite"></div>
+          <p class="micro-note">Logo hanya dipreview di browser. File gambar tidak dikirim ke server. Setelah JSON disalin, unggah logo yang sama ke AI generator.</p>
 
-</script>
-</body></html>
+          <div class="divider"></div>
+          <div class="section-title"><span class="step">03</span><div><h3>Daftar Isi</h3><p>AI akan memakai daftar isi untuk menentukan ilustrasi dan menyusun sinopsis belakang.</p></div></div>
+          <label class="field"><span>Daftar isi <b>*</b></span><textarea name="toc" id="toc" rows="10" required maxlength="12000" placeholder="BAB I Konsep Dasar Ekonomi&#10;1. Kebutuhan dan Kelangkaan&#10;2. Kegiatan Ekonomi&#10;BAB II Pasar dan Harga&#10;..."></textarea><small class="counter"><span id="tocCount">0</span>/12.000 karakter</small></label>
+
+          <div id="formError" class="form-error" role="alert" hidden></div>
+          <button class="btn btn-primary generate" id="generateBtn" type="submit"><span>Generate JSON Prompt</span><span aria-hidden="true">→</span></button>
+        </form>
+      </section>
+
+      <aside class="right-column">
+        <section class="panel spec-panel">
+          <div class="panel-head compact"><div><span class="step">LIVE</span><h2>Preview Teknis</h2></div></div>
+          <div class="spec-strip">
+            <div><span>Canvas</span><strong id="canvasSize">— × 307 mm</strong></div>
+            <div><span>Punggung</span><strong id="spineSize">— mm</strong></div>
+            <div><span>Safe area</span><strong>15 mm</strong></div>
+          </div>
+          <div class="wrap-preview" aria-label="Skema cover full wrap">
+            <div class="bleed-tag left">5</div>
+            <div class="cover back"><span>BACK</span><div class="safe-box synopsis">SINOPSIS</div></div>
+            <div class="spine" id="spinePreview"><span>SPINE</span></div>
+            <div class="cover front">
+              <span>FRONT</span>
+              <div class="safe-box logo-zone">LOGO</div>
+              <div class="safe-box title-zone">JUDUL</div>
+              <div class="hero-zone">HERO</div>
+              <div class="safe-box author-zone">PENULIS</div>
+              <div class="safe-box class-zone">KELAS</div>
+            </div>
+            <div class="bleed-tag right">5</div>
+          </div>
+          <div class="formula"><span>Lebar punggung</span><code><span id="pagesFormula">halaman</span> × 0,0472 mm = <b id="formulaResult">—</b></code></div>
+        </section>
+
+        <section class="panel output-panel" id="outputPanel">
+          <div class="panel-head compact">
+            <div><span class="step">04</span><h2>Output JSON</h2></div>
+            <div class="output-actions">
+              <button class="btn btn-soft" id="downloadBtn" type="button" disabled>Unduh</button>
+              <button class="btn btn-primary small" id="copyBtn" type="button" disabled>Salin JSON</button>
+            </div>
+          </div>
+          <div class="empty-output" id="emptyOutput"><span>{ }</span><strong>JSON belum dibuat</strong><p>Lengkapi formulir lalu tekan “Generate JSON Prompt”.</p></div>
+          <pre id="jsonOutput" tabindex="0" hidden></pre>
+          <div class="output-foot"><span>Template</span><code>LITNUS-SCHOOL-WRAP-A4-V1.0</code></div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <dialog id="helpDialog" class="help-dialog">
+    <form method="dialog" class="dialog-card">
+      <div class="dialog-head"><div><span class="eyebrow">PETUNJUK SINGKAT</span><h2>Dari formulir ke AI generator</h2></div><button class="icon-btn" value="close" aria-label="Tutup">×</button></div>
+      <ol class="steps-list">
+        <li><span>1</span><div><strong>Isi data buku</strong><p>Judul, penulis, halaman, jenjang, kelas, dan daftar isi.</p></div></li>
+        <li><span>2</span><div><strong>Tambahkan logo</strong><p>Pilih logo sekolah/yayasan. File tetap di perangkat dan hanya nama file yang masuk JSON.</p></div></li>
+        <li><span>3</span><div><strong>Generate & salin JSON</strong><p>Punggung dan ukuran kanvas dihitung otomatis. Layout depan, belakang, serta safe margin sudah dikunci.</p></div></li>
+        <li><span>4</span><div><strong>Buka AI generator</strong><p>Unggah logo asli yang sama, lalu tempel seluruh JSON sebagai instruksi pembuatan cover.</p></div></li>
+        <li><span>5</span><div><strong>Cek hasil sebelum cetak</strong><p>Pastikan teks, logo, trim, bleed, dan anatomi ilustrasi benar. Koreksi minor dapat dilakukan di Photoshop.</p></div></li>
+      </ol>
+      <div class="privacy-box"><strong>Privasi</strong><p>Aplikasi tidak memakai database dan tidak menyimpan isi formulir. File logo tidak diunggah ke backend.</p></div>
+      <button class="btn btn-primary full" value="close">Mengerti</button>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>
