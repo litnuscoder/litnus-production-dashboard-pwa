@@ -32,7 +32,7 @@
       <div>
         <span class="eyebrow">LITNUS • TEMPLATE A4 FULL WRAP</span>
         <h1>Prompt cover seragam,<br><span>tanpa desain yang liar.</span></h1>
-        <p>Isi data buku, unggah referensi logo, lalu aplikasi menghitung punggung dan menyusun satu JSON prompt yang siap ditempel ke AI generator.</p>
+        <p>Isi data buku. Aplikasi menghitung punggung dan menyusun satu JSON prompt baku. Logo baru diunggah langsung saat Anda membuka ChatGPT atau Gemini.</p>
       </div>
       <div class="hero-badges" aria-label="Keunggulan">
         <span>Bleed 5 mm</span><span>Safe margin 15 mm</span><span>Spine otomatis</span><span>Anti AI slop</span>
@@ -49,12 +49,12 @@
         <form id="coverForm" novalidate>
           <div class="form-grid two">
             <label class="field"><span>Mata pelajaran <b>*</b></span><input name="subject" id="subject" placeholder="Contoh: Ekonomi" required maxlength="120" /></label>
-            <label class="field"><span>Judul buku <b>*</b></span><input name="title" id="title" placeholder="Contoh: Ekonomi" required maxlength="180" /></label>
+            <label class="field"><span>Judul buku <b>*</b></span><input name="title" id="title" placeholder="Contoh: Modul Pembelajaran Ekonomi" required maxlength="180" /></label>
           </div>
-          <label class="field"><span>Subjudul <em>opsional</em></span><input name="subtitle" id="subtitle" placeholder="Contoh: Modul Pembelajaran" maxlength="220" /></label>
+          <label class="field"><span>Subjudul <em>opsional</em></span><input name="subtitle" id="subtitle" placeholder="Kosongkan bila tidak ada" maxlength="220" /></label>
           <div class="form-grid two">
             <label class="field"><span>Nama penulis <b>*</b></span><input name="author" id="author" placeholder="Nama lengkap" required maxlength="220" /></label>
-            <label class="field"><span>Jumlah halaman <b>*</b></span><input name="pages" id="pages" type="number" min="1" max="3000" step="1" placeholder="200" required /></label>
+            <label class="field"><span>Jumlah halaman <b>*</b></span><input name="pages" id="pages" type="number" min="1" max="3000" step="1" placeholder="52" required /></label>
           </div>
           <div class="form-grid two">
             <label class="field"><span>Jenjang <b>*</b></span>
@@ -62,27 +62,22 @@
                 <option value="">Pilih jenjang</option><option>SD/MI</option><option>SMP/MTs</option><option>SMA/MA</option><option>SMK/MAK</option><option value="Lainnya">Lainnya</option>
               </select>
             </label>
-            <label class="field"><span>Kelas <b>*</b></span><input name="className" id="className" placeholder="Contoh: X" required maxlength="30" /></label>
+            <label class="field"><span>Kelas <b>*</b></span><input name="className" id="className" placeholder="Contoh: XII" required maxlength="30" /></label>
           </div>
 
           <div class="divider"></div>
-          <div class="section-title"><span class="step">02</span><div><h3>Identitas & Logo</h3><p>Semua logo akan ditempatkan di kanan atas cover depan.</p></div></div>
+          <div class="section-title"><span class="step">02</span><div><h3>Identitas Buku</h3><p>Nama sekolah/yayasan opsional. Logo tidak diunggah melalui formulir.</p></div></div>
           <div class="form-grid two">
             <label class="field"><span>Nama sekolah <em>opsional</em></span><input name="school" id="school" placeholder="Nama sekolah" maxlength="180" /></label>
             <label class="field"><span>Nama yayasan <em>opsional</em></span><input name="foundation" id="foundation" placeholder="Nama yayasan" maxlength="180" /></label>
           </div>
-
-          <label class="upload" id="uploadArea">
-            <input id="logos" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" multiple hidden />
-            <span class="upload-icon">＋</span>
-            <span><strong>Tambahkan logo referensi</strong><small>PNG, JPG, WEBP, atau SVG • maksimal 4 file</small></span>
-            <button type="button" class="btn btn-soft" id="chooseLogoBtn">Pilih file</button>
-          </label>
-          <div id="logoPreview" class="logo-preview" aria-live="polite"></div>
-          <p class="micro-note">Logo hanya dipreview di browser. File gambar tidak dikirim ke server. Setelah JSON disalin, unggah logo yang sama ke AI generator.</p>
+          <div class="privacy-box">
+            <strong>Logo diunggah saat prompting ke AI</strong>
+            <p>Setelah JSON selesai, klik “ChatGPT — Direkomendasikan” atau “Gemini”. JSON akan disalin. Di AI generator, unggah file logo yang ingin dipakai lalu tempel JSON. Prompt sudah mengunci posisi logo di kanan atas dan melarang AI membuat logo palsu atau placeholder.</p>
+          </div>
 
           <div class="divider"></div>
-          <div class="section-title"><span class="step">03</span><div><h3>Daftar Isi</h3><p>AI akan memakai daftar isi untuk menentukan ilustrasi dan menyusun sinopsis belakang.</p></div></div>
+          <div class="section-title"><span class="step">03</span><div><h3>Daftar Isi</h3><p>Daftar isi dipakai untuk menentukan ilustrasi dan menyusun sinopsis belakang secara terbatas.</p></div></div>
           <label class="field"><span>Daftar isi <b>*</b></span><textarea name="toc" id="toc" rows="10" required maxlength="12000" placeholder="BAB I Konsep Dasar Ekonomi&#10;1. Kebutuhan dan Kelangkaan&#10;2. Kegiatan Ekonomi&#10;BAB II Pasar dan Harga&#10;..."></textarea><small class="counter"><span id="tocCount">0</span>/12.000 karakter</small></label>
 
           <div id="formError" class="form-error" role="alert" hidden></div>
@@ -113,6 +108,7 @@
             <div class="bleed-tag right">5</div>
           </div>
           <div class="formula"><span>Lebar punggung</span><code><span id="pagesFormula">halaman</span> × 0,0472 mm = <b id="formulaResult">—</b></code></div>
+          <p class="micro-note">Preview di atas hanya panduan aplikasi. Prompt versi 1.1 secara eksplisit melarang AI menampilkan garis, angka, koordinat, label panel, bleed, safe area, atau anotasi teknis pada cover final.</p>
         </section>
 
         <section class="panel output-panel" id="outputPanel">
@@ -125,7 +121,17 @@
           </div>
           <div class="empty-output" id="emptyOutput"><span>{ }</span><strong>JSON belum dibuat</strong><p>Lengkapi formulir lalu tekan “Generate JSON Prompt”.</p></div>
           <pre id="jsonOutput" tabindex="0" hidden></pre>
-          <div class="output-foot"><span>Template</span><code>LITNUS-SCHOOL-WRAP-A4-V1.0</code></div>
+
+          <div class="privacy-box" style="margin-top:12px;margin-bottom:0">
+            <strong>Kirim ke AI generator</strong>
+            <p>Button akan menyalin JSON lalu membuka AI. Setelah terbuka, unggah logo sekolah/yayasan pada chat yang sama dan tempel JSON.</p>
+            <div class="output-actions" style="margin-top:10px;flex-wrap:wrap">
+              <button class="btn btn-primary" id="chatgptBtn" type="button" disabled>ChatGPT — Direkomendasikan</button>
+              <button class="btn btn-soft" id="geminiBtn" type="button" disabled>Gemini</button>
+            </div>
+          </div>
+
+          <div class="output-foot"><span>Template</span><code>LITNUS-SCHOOL-WRAP-A4-V1.1</code></div>
         </section>
       </aside>
     </div>
@@ -133,15 +139,15 @@
 
   <dialog id="helpDialog" class="help-dialog">
     <form method="dialog" class="dialog-card">
-      <div class="dialog-head"><div><span class="eyebrow">PETUNJUK SINGKAT</span><h2>Dari formulir ke AI generator</h2></div><button class="icon-btn" value="close" aria-label="Tutup">×</button></div>
+      <div class="dialog-head"><div><span class="eyebrow">PETUNJUK SINGKAT</span><h2>Dari formulir ke cover AI</h2></div><button class="icon-btn" value="close" aria-label="Tutup">×</button></div>
       <ol class="steps-list">
-        <li><span>1</span><div><strong>Isi data buku</strong><p>Judul, penulis, halaman, jenjang, kelas, dan daftar isi.</p></div></li>
-        <li><span>2</span><div><strong>Tambahkan logo</strong><p>Pilih logo sekolah/yayasan. File tetap di perangkat dan hanya nama file yang masuk JSON.</p></div></li>
-        <li><span>3</span><div><strong>Generate & salin JSON</strong><p>Punggung dan ukuran kanvas dihitung otomatis. Layout depan, belakang, serta safe margin sudah dikunci.</p></div></li>
-        <li><span>4</span><div><strong>Buka AI generator</strong><p>Unggah logo asli yang sama, lalu tempel seluruh JSON sebagai instruksi pembuatan cover.</p></div></li>
-        <li><span>5</span><div><strong>Cek hasil sebelum cetak</strong><p>Pastikan teks, logo, trim, bleed, dan anatomi ilustrasi benar. Koreksi minor dapat dilakukan di Photoshop.</p></div></li>
+        <li><span>1</span><div><strong>Isi data buku</strong><p>Masukkan judul, penulis, jumlah halaman, jenjang, kelas, identitas opsional, dan daftar isi.</p></div></li>
+        <li><span>2</span><div><strong>Generate JSON</strong><p>Aplikasi menghitung punggung dan menyusun aturan layout, safe margin, ilustrasi, sinopsis, serta negative prompt secara otomatis.</p></div></li>
+        <li><span>3</span><div><strong>Buka ChatGPT</strong><p>Klik “ChatGPT — Direkomendasikan”. JSON akan disalin dan ChatGPT dibuka di tab baru. Gemini tetap tersedia sebagai alternatif.</p></div></li>
+        <li><span>4</span><div><strong>Unggah logo langsung di AI</strong><p>Upload logo sekolah/yayasan pada chat AI, lalu tempel JSON yang sudah disalin. Logo tidak perlu dan tidak boleh diunggah melalui formulir aplikasi ini.</p></div></li>
+        <li><span>5</span><div><strong>Periksa artwork final</strong><p>Cover final tidak boleh menampilkan angka ukuran, koordinat, garis bantu, label FRONT/BACK/SPINE, ISBN, barcode, QR, atau kotak placeholder. Koreksi minor dapat dilakukan di Photoshop.</p></div></li>
       </ol>
-      <div class="privacy-box"><strong>Privasi</strong><p>Aplikasi tidak memakai database dan tidak menyimpan isi formulir. File logo tidak diunggah ke backend.</p></div>
+      <div class="privacy-box"><strong>Privasi</strong><p>Aplikasi tidak memakai database dan tidak menyimpan isi formulir. Form hanya dikirim ke endpoint stateless untuk menyusun JSON.</p></div>
       <button class="btn btn-primary full" value="close">Mengerti</button>
     </form>
   </dialog>
