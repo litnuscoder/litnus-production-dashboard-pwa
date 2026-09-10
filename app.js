@@ -19,6 +19,8 @@
   const level = $("level");
   const chatgptBtn = $("chatgptBtn");
   const geminiBtn = $("geminiBtn");
+  const fontGenre = $("fontGenre");
+  const fontGenreHelp = $("fontGenreHelp");
   let currentJson = "";
 
   function round2(n) { return Math.round((n + Number.EPSILON) * 100) / 100; }
@@ -80,6 +82,22 @@
     $("customCount").textContent = customInstruction.value.length.toLocaleString("id-ID");
   }
 
+
+  const FONT_GENRE_HELP = {
+    tegas_sans: "Tegas, modern, dan sangat mudah dibaca. Cocok untuk matematika, ekonomi, informatika, dan IPA.",
+    elegan_serif: "Anggun, berkelas, dan berwibawa. Cocok untuk bahasa, sastra, sejarah, dan SKI.",
+    klasik_akademik: "Formal dan mapan dengan karakter serif/slab. Cocok untuk buku ajar akademik dan ilmu sosial.",
+    islami_arabic_latin: "Huruf Latin dengan nuansa kaligrafis Arab yang halus. Cocok untuk PAI, SKI, Bahasa Arab, dan madrasah.",
+    modern_premium: "Polished dan kontemporer. Cocok untuk seri buku sekolah modern lintas mata pelajaran.",
+    friendly_rounded: "Ramah dan ringan tanpa terasa kekanak-kanakan. Cocok untuk SD, SMP, dan modul pengantar.",
+    formal_resmi: "Disiplin dan institusional. Cocok untuk modul resmi sekolah atau yayasan."
+  };
+
+  function updateFontGenreHelp() {
+    if (!fontGenreHelp || !fontGenre) return;
+    fontGenreHelp.textContent = FONT_GENRE_HELP[fontGenre.value] || FONT_GENRE_HELP.tegas_sans;
+  }
+
   function updatePreviewLabels() {
     $("classPreview").textContent = className.value.trim() || "X";
     $("levelPreview").textContent = level.value.trim() || "SMA/MA";
@@ -99,6 +117,7 @@
       primaryColor: sanitizeHex(fd.get("primaryColor"), "#0F5132"),
       secondaryColor: sanitizeHex(fd.get("secondaryColor"), "#D4AF37"),
       stylePreset: fd.get("stylePreset") || "premium_school",
+      fontGenre: fd.get("fontGenre") || "tegas_sans",
       titleTextEffect: fd.get("titleTextEffect") || "clean_flat",
       moodPreset: fd.get("moodPreset") || "none",
       footerText: fd.get("footerText"),
@@ -196,6 +215,7 @@
     primaryColor.value = primaryHex.value = "#75000C";
     secondaryColor.value = secondaryHex.value = "#D435AA";
     $("stylePreset").value = "premium_school";
+    $("fontGenre").value = "islami_arabic_latin";
     $("titleTextEffect").value = "gold_3d";
     $("moodPreset").value = "cinta_indonesia";
     $("footerText").value = "Untuk Kalangan Sendiri, YAYASAN BMCI";
@@ -214,6 +234,7 @@
   customInstruction.addEventListener("input", updateCount);
   className.addEventListener("input", updatePreviewLabels);
   level.addEventListener("change", updatePreviewLabels);
+  fontGenre.addEventListener("change", updateFontGenreHelp);
   primaryColor.addEventListener("input", () => syncColorInputs(primaryColor, primaryHex, "#0F5132"));
   secondaryColor.addEventListener("input", () => syncColorInputs(secondaryColor, secondaryHex, "#D4AF37"));
   primaryHex.addEventListener("change", () => syncColorInputs(primaryHex, primaryColor, "#0F5132"));
@@ -231,5 +252,6 @@
   updateSpec();
   updateCount();
   updatePreviewLabels();
+  updateFontGenreHelp();
   syncOutputState(false);
 })();
