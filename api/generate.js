@@ -22,21 +22,18 @@ function validate(body) {
     ["author", "Nama penulis"],
     ["className", "Kelas"],
     ["level", "Jenjang"],
-    ["toc", "Daftar isi"],
+    ["toc", "Daftar isi"]
   ];
   const errors = [];
-
   for (const [key, label] of required) {
     if (!String(body[key] ?? "").trim()) errors.push(`${label} wajib diisi.`);
   }
-
   const pages = Number(body.pages);
   if (!Number.isInteger(pages) || pages < 1 || pages > 3000) {
     errors.push("Jumlah halaman harus berupa bilangan bulat 1–3000.");
   }
-  if (String(body.toc ?? "").length > 12000) {
-    errors.push("Daftar isi terlalu panjang (maksimal 12.000 karakter).");
-  }
+  if (String(body.toc ?? "").length > 12000) errors.push("Daftar isi terlalu panjang (maksimal 12.000 karakter).");
+  if (String(body.customInstruction ?? "").length > 1800) errors.push("Instruksi custom terlalu panjang (maksimal 1.800 karakter).");
   return errors;
 }
 

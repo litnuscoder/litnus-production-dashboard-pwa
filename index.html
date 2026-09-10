@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#07110b" />
   <meta name="description" content="Generator JSON prompt cover buku sekolah A4 full-wrap yang konsisten, modular, dan siap dipakai di ChatGPT atau Gemini." />
   <title>CoverPrompt — Generator Cover Buku Sekolah</title>
@@ -26,7 +26,7 @@
       <div>
         <span class="eyebrow">LITNUS • TEMPLATE A4 FULL WRAP</span>
         <h1>Layout seragam,<br><span>visual tetap bisa bervariasi.</span></h1>
-        <p>Isi data buku, pilih warna dan style, lalu hasilkan satu JSON prompt. Tata letak utama dikunci agar seri buku tetap konsisten meski visual tiap kelas berbeda.</p>
+        <p>Isi data buku, pilih warna, nuansa, dan style, lalu hasilkan satu JSON prompt. Tata letak utama dikunci agar seri buku tetap konsisten meski visual tiap kelas berbeda.</p>
       </div>
       <div class="hero-badges"><span>Bleed 5 mm</span><span>Safe margin 15 mm</span><span>Spine otomatis</span><span>Anti AI slop</span></div>
     </section>
@@ -37,7 +37,7 @@
         <form id="coverForm" novalidate>
           <div class="form-grid two">
             <label class="field"><span>Mata pelajaran <b>*</b></span><input name="subject" id="subject" placeholder="Contoh: Sejarah Kebudayaan Islam" required maxlength="120" /></label>
-            <label class="field"><span>Judul buku <b>*</b></span><input name="title" id="title" placeholder="Contoh: Sejarah Kebudayaan Islam" required maxlength="180" /></label>
+            <label class="field"><span>Judul buku <b>*</b></span><input name="title" id="title" placeholder="Contoh: Kejayaan Islam Abad ke 10" required maxlength="180" /></label>
           </div>
           <label class="field"><span>Subjudul <em>opsional</em></span><input name="subtitle" id="subtitle" placeholder="Kosongkan bila tidak ada" maxlength="220" /></label>
           <div class="form-grid two">
@@ -50,16 +50,21 @@
           </div>
 
           <div class="divider"></div>
-          <div class="section-title"><span class="step">02</span><div><h3>Warna & Style</h3><p>Kontrol visual boleh berubah; posisi logo, judul, hero, penulis, dan badge kelas tetap dikunci.</p></div></div>
+          <div class="section-title"><span class="step">02</span><div><h3>Warna, Style & Nuansa</h3><p>Kontrol visual boleh berubah; posisi logo, judul, hero, penulis, dan badge kelas tetap dikunci.</p></div></div>
           <div class="form-grid two color-grid">
             <label class="field"><span>Primary color</span><div class="color-control"><input type="color" id="primaryColor" name="primaryColor" value="#0F5132" /><input type="text" id="primaryHex" value="#0F5132" maxlength="7" aria-label="Primary hex" /></div></label>
             <label class="field"><span>Secondary / accent</span><div class="color-control"><input type="color" id="secondaryColor" name="secondaryColor" value="#D4AF37" /><input type="text" id="secondaryHex" value="#D4AF37" maxlength="7" aria-label="Secondary hex" /></div></label>
           </div>
           <div class="form-grid two">
             <label class="field"><span>Style preset</span><select name="stylePreset" id="stylePreset"><option value="premium_school">Premium School</option><option value="modern_islamic">Modern Islamic</option><option value="academic_clean">Academic Clean</option><option value="cinematic_education">Cinematic Educational</option><option value="soft_illustrated">Soft Illustrated</option></select></label>
+            <label class="field"><span>Text effect judul</span><select name="titleTextEffect" id="titleTextEffect"><option value="clean_flat">Clean Flat</option><option value="soft_emboss">Soft Emboss</option><option value="gold_3d">3D Gold</option><option value="glass_3d">3D Glass</option><option value="bold_outline">Bold Outline</option></select></label>
+          </div>
+          <div class="form-grid two">
+            <label class="field"><span>Nuansa tema</span><select name="moodPreset" id="moodPreset"><option value="none">Netral / otomatis</option><option value="cinta_indonesia">Cinta Indonesia</option><option value="islami_prestasi">Islami & Prestasi</option><option value="akademik_elegan">Akademik Elegan</option><option value="hangat_asrama">Hangat Asrama</option><option value="sejarah_kejayaan">Sejarah Kejayaan</option></select></label>
             <label class="field"><span>Teks bawah kelas</span><input name="footerText" id="footerText" value="Untuk Kalangan Sendiri, YAYASAN BMCI" maxlength="180" /></label>
           </div>
-          <label class="field"><span>Instruksi custom <em>opsional</em></span><textarea name="customInstruction" id="customInstruction" class="short-textarea" rows="4" maxlength="1800" placeholder="Contoh: penulis jangan memakai pill, gunakan ornamen geometris lebih tipis, suasana hangat, jangan tampilkan label Kurikulum Merdeka, atau arah visual lain yang diinginkan."></textarea><small class="counter"><span id="customCount">0</span>/1.800 karakter</small></label>
+          <label class="field"><span>Instruksi custom <em>opsional</em></span><textarea name="customInstruction" id="customInstruction" class="short-textarea" rows="4" maxlength="1800" placeholder="Contoh: latar kerajaan Islam dulu kala, kebijaksanaan, arsitektur elegan, lampu gantung klasik, judul memakai efek 3D emas yang elegan, jangan terlalu ramai."></textarea><small class="counter"><span id="customCount">0</span>/1.800 karakter</small></label>
+          <div class="notice"><strong>Logo diunggah saat prompting ke AI.</strong><p>Aplikasi ini tidak menerima upload logo. Saat membuka ChatGPT atau Gemini, JSON otomatis disalin. Di AI generator, unggah file logo yang ingin dipakai lalu tempel JSON.</p></div>
           <div class="notice"><strong>Layout tetap dikunci.</strong><p>Instruksi custom hanya mengubah treatment visual. Ia tidak boleh mengubah posisi logo kanan atas, judul tengah, penulis kiri bawah, badge kelas kanan bawah, safe margin, punggung, atau aturan no-ISBN.</p></div>
 
           <div class="divider"></div>
@@ -77,9 +82,9 @@
           <div class="spec-strip"><div><span>Canvas</span><strong id="canvasSize">— × 307 mm</strong></div><div><span>Punggung</span><strong id="spineSize">— mm</strong></div><div><span>Safe area</span><strong>15 mm</strong></div></div>
           <div class="wrap-preview" id="wrapPreview">
             <div class="bleed-tag">5</div>
-            <div class="cover back"><span>BACK</span><div class="safe-box synopsis">SINOPSIS</div></div>
+            <div class="cover back"><span>BACK</span><div class="safe-box synopsis"></div></div>
             <div class="spine" id="spinePreview"><span>SPINE</span></div>
-            <div class="cover front"><span>FRONT</span><div class="safe-box logo-zone">LOGO</div><div class="safe-box title-zone">JUDUL</div><div class="hero-zone">HERO</div><div class="safe-box author-zone">PENULIS</div><div class="class-medallion"><b id="classPreview">X</b><small id="levelPreview">SMA/MA</small></div></div>
+            <div class="cover front"><span>FRONT</span><div class="safe-box logo-zone">LOGO</div><div class="safe-box title-zone">JUDUL</div><div class="hero-zone">HERO</div><div class="safe-box author-zone">PENULIS</div><div class="class-medallion"><b id="classPreview">X</b><small id="levelPreview">SMA/MA</small></div><div class="safe-box footer-zone">NUANSA / FOOTER</div></div>
             <div class="bleed-tag">5</div>
           </div>
           <div class="formula"><span>Lebar punggung</span><code><span id="pagesFormula">halaman</span> × 0,0472 mm = <b id="formulaResult">—</b></code></div>
@@ -87,20 +92,20 @@
         </section>
 
         <section class="panel output-panel" id="outputPanel">
-          <div class="panel-head compact"><div><span class="step">04</span><h2>Output JSON</h2></div><div class="output-actions"><button class="btn btn-soft" id="downloadBtn" type="button" disabled>Unduh</button><button class="btn btn-primary small" id="copyBtn" type="button" disabled>Salin JSON</button></div></div>
-          <div class="empty-output" id="emptyOutput"><span>{ }</span><strong>JSON belum dibuat</strong><p>Lengkapi formulir lalu tekan “Generate JSON Prompt”.</p></div>
+          <div class="panel-head compact"><div><span class="step">04</span><h2>Output JSON</h2></div><div class="output-actions"><button class="btn btn-soft" id="downloadBtn" type="button" disabled>Unduh</button><button class="btn btn-primary small" id="copyBtn" type="button" disabled>Salin Prompt</button></div></div>
+          <div class="empty-output" id="emptyOutput"><span>{ }</span><strong>Prompt belum dibuat</strong><p>Lengkapi formulir lalu tekan “Generate JSON Prompt”.</p></div>
           <pre id="jsonOutput" tabindex="0" hidden></pre>
           <div class="ai-launch-card">
             <div><strong>Kirim ke AI Generator</strong><p>Saat tombol diklik, JSON otomatis disalin. Setelah AI terbuka, unggah logo pada chat yang sama lalu tempel JSON.</p></div>
             <div class="ai-actions"><button class="btn btn-primary" id="chatgptBtn" type="button" disabled>ChatGPT <span>Direkomendasikan</span></button><button class="btn btn-soft" id="geminiBtn" type="button" disabled>Gemini</button></div>
           </div>
-          <div class="output-foot"><span>Template</span><code>LITNUS-SCHOOL-WRAP-A4-V1.2</code></div>
+          <div class="output-foot"><span>Template</span><code>LITNUS-SCHOOL-WRAP-A4-V1.3</code></div>
         </section>
       </aside>
     </div>
   </main>
 
-  <dialog id="helpDialog" class="help-dialog"><form method="dialog" class="dialog-card"><div class="dialog-head"><div><span class="eyebrow">PETUNJUK SINGKAT</span><h2>Dari data buku ke cover AI</h2></div><button class="icon-btn" value="close">×</button></div><ol class="steps-list"><li><span>1</span><div><strong>Isi informasi buku</strong><p>Masukkan judul, penulis, halaman, jenjang, kelas, dan daftar isi.</p></div></li><li><span>2</span><div><strong>Pilih warna & style</strong><p>Atur primary, secondary, preset, teks bawah badge kelas, serta instruksi custom bila diperlukan.</p></div></li><li><span>3</span><div><strong>Generate JSON</strong><p>Spine, ukuran kanvas, layout lock, sinopsis, dan negative prompt disusun otomatis.</p></div></li><li><span>4</span><div><strong>Buka ChatGPT</strong><p>Klik ChatGPT atau Gemini. JSON otomatis disalin sebelum tab AI dibuka.</p></div></li><li><span>5</span><div><strong>Unggah logo di AI</strong><p>Logo tidak diunggah di aplikasi ini. Lampirkan logo langsung pada chat AI yang sama, lalu tempel JSON.</p></div></li></ol><div class="privacy-box"><strong>Tidak ada database.</strong><p>Aplikasi hanya memproses form secara stateless untuk menyusun prompt.</p></div><button class="btn btn-primary full" value="close">Mengerti</button></form></dialog>
+  <dialog id="helpDialog" class="help-dialog"><form method="dialog" class="dialog-card"><div class="dialog-head"><div><span class="eyebrow">PETUNJUK SINGKAT</span><h2>Dari data buku ke cover AI</h2></div><button class="icon-btn" value="close">×</button></div><ol class="steps-list"><li><span>1</span><div><strong>Isi informasi buku</strong><p>Masukkan judul, penulis, halaman, jenjang, kelas, dan daftar isi.</p></div></li><li><span>2</span><div><strong>Pilih warna, style, dan nuansa</strong><p>Atur primary, secondary, style preset, text effect judul, nuansa tema, teks bawah kelas, serta instruksi custom bila diperlukan.</p></div></li><li><span>3</span><div><strong>Generate JSON</strong><p>Spine, ukuran kanvas, layout lock, sinopsis, dan negative prompt disusun otomatis.</p></div></li><li><span>4</span><div><strong>Buka ChatGPT</strong><p>Klik ChatGPT atau Gemini. JSON otomatis disalin sebelum tab AI dibuka.</p></div></li><li><span>5</span><div><strong>Unggah logo di AI</strong><p>Logo tidak diunggah di aplikasi ini. Lampirkan logo langsung pada chat AI yang sama, lalu tempel JSON.</p></div></li></ol><div class="privacy-box"><strong>Tidak ada database.</strong><p>Aplikasi hanya memproses form secara stateless untuk menyusun prompt.</p></div><button class="btn btn-primary full" value="close">Mengerti</button></form></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/app.js" defer></script>
 </body>
