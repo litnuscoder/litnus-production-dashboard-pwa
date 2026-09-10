@@ -25,15 +25,18 @@ function validate(body) {
     ["toc", "Daftar isi"],
   ];
   const errors = [];
+
   for (const [key, label] of required) {
     if (!String(body[key] ?? "").trim()) errors.push(`${label} wajib diisi.`);
   }
+
   const pages = Number(body.pages);
   if (!Number.isInteger(pages) || pages < 1 || pages > 3000) {
     errors.push("Jumlah halaman harus berupa bilangan bulat 1–3000.");
   }
-  if (String(body.toc ?? "").length > 12000) errors.push("Daftar isi terlalu panjang (maksimal 12.000 karakter).");
-  if (Array.isArray(body.logos) && body.logos.length > 4) errors.push("Maksimal 4 logo.");
+  if (String(body.toc ?? "").length > 12000) {
+    errors.push("Daftar isi terlalu panjang (maksimal 12.000 karakter).");
+  }
   return errors;
 }
 
