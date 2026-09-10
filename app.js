@@ -54,7 +54,7 @@
   };
 
   function round2(n) { return Math.round((n + Number.EPSILON) * 100) / 100; }
-  function escapeHtml(str) { return String(str).replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c])); }
+  function escapeHtml(str) { return String(str).replace(/[&<>'\"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'\"':"&quot;"}[c])); }
   function sanitizeHex(value, fallback) {
     const v = String(value || "").trim().toUpperCase();
     return /^#[0-9A-F]{6}$/.test(v) ? v : fallback;
@@ -78,6 +78,127 @@
     errorBox.textContent = "";
   }
 
+  function closeAllCustomSelects(except = null) {
+    document.querySelectorAll(".custom-select.is-open").forEach((custom) => {
+      if (custom === except) return;
+      custom.classList.remove("is-open");
+      const trigger = custom.querySelector(".custom-select-trigger");
+      if (trigger) trigger.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  function refreshCustomSelect(select) {
+    const custom = select.closest(".select-wrap")?.querySelector(".custom-select");
+    if (!custom) return;
+    const selected = select.options[select.selectedIndex] || select.options[0];
+    const label = custom.querySelector(".custom-select-label");
+    if (label) label.textContent = selected?.textContent || "Pilih";
+    custom.querySelectorAll(".custom-select-option").forEach((option) => {
+      const isSelected = option.dataset.value === select.value;
+      option.classList.toggle("is-selected", isSelected);
+      option.setAttribute("aria-selected", isSelected ? "true" : "false");
+    });
+  }
+
+  function refreshAllCustomSelects() {
+    document.querySelectorAll(".select-wrap select").forEach(refreshCustomSelect);
+  }
+
+  function enhanceCustomSelects() {
+    document.querySelectorAll(".select-wrap select").forEach((select) => {
+      if (select.dataset.customized === "true") return;
+      select.dataset.customized = "true";
+      const wrapper = select.closest(".select-wrap");
+      wrapper?.classList.add("has-custom-select");
+      select.classList.add("native-select-proxy");
+
+      const custom = document.createElement("div");
+      custom.className = "custom-select";
+
+      const trigger = document.createElement("button");
+      trigger.type = "button";
+      trigger.className = "custom-select-trigger";
+      trigger.setAttribute("aria-haspopup", "listbox");
+      trigger.setAttribute("aria-expanded", "false");
+      trigger.innerHTML = '<span class="custom-select-label"></span><span class="custom-select-chevron" aria-hidden="true"></span>';
+
+      const menu = document.createElement("div");
+      menu.className = "custom-select-menu";
+      menu.setAttribute("role", "listbox");
+      menu.setAttribute("aria-label", select.getAttribute("aria-label") || select.name || "Pilihan");
+
+      [...select.options].forEach((nativeOption) => {
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = "custom-select-option";
+        option.dataset.value = nativeOption.value;
+        option.setAttribute("role", "option");
+        option.disabled = nativeOption.disabled;
+        option.innerHTML = `<span>${escapeHtml(nativeOption.textContent)}</span><span class="custom-select-check" aria-hidden="true">✓</span>`;
+        option.addEventListener("click", () => {
+          select.value = nativeOption.value;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+          refreshCustomSelect(select);
+          custom.classList.remove("is-open");
+          trigger.setAttribute("aria-expanded", "false");
+          trigger.focus();
+        });
+        menu.appendChild(option);
+      });
+
+      trigger.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const opening = !custom.classList.contains("is-open");
+        closeAllCustomSelects(custom);
+        custom.classList.toggle("is-open", opening);
+        trigger.setAttribute("aria-expanded", opening ? "true" : "false");
+        if (opening) {
+          const selectedOption = menu.querySelector(".custom-select-option.is-selected");
+          selectedOption?.scrollIntoView({ block: "nearest" });
+        }
+      });
+
+      trigger.addEventListener("keydown", (event) => {
+        const options = [...menu.querySelectorAll(".custom-select-option:not(:disabled)")];
+        if (!options.length) return;
+        const currentIndex = options.findIndex(option => option.dataset.value === select.value);
+        let nextIndex = currentIndex < 0 ? 0 : currentIndex;
+        if (event.key === "ArrowDown") nextIndex = Math.min(options.length - 1, nextIndex + 1);
+        else if (event.key === "ArrowUp") nextIndex = Math.max(0, nextIndex - 1);
+        else if (event.key === "Home") nextIndex = 0;
+        else if (event.key === "End") nextIndex = options.length - 1;
+        else if (event.key === "Escape") {
+          custom.classList.remove("is-open");
+          trigger.setAttribute("aria-expanded", "false");
+          return;
+        } else if (event.key === "Enter" || event.key === " ") {
+          if (!custom.classList.contains("is-open")) {
+            event.preventDefault();
+            trigger.click();
+          }
+          return;
+        } else return;
+
+        event.preventDefault();
+        select.value = options[nextIndex].dataset.value;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        refreshCustomSelect(select);
+      });
+
+      select.addEventListener("change", () => refreshCustomSelect(select));
+      custom.append(trigger, menu);
+      select.insertAdjacentElement("afterend", custom);
+      refreshCustomSelect(select);
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".custom-select")) closeAllCustomSelects();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeAllCustomSelects();
+    });
+  }
+
   function syncColorInputs(source, mirror, fallback) {
     const value = sanitizeHex(source.value, fallback);
     source.value = value;
@@ -88,7 +209,8 @@
 
   function updateColorMode() {
     const manual = colorMode.value === "manual";
-    colorFields.classList.toggle("disabled-group", !manual);
+    colorFields.hidden = !manual;
+    colorFields.style.display = manual ? "grid" : "none";
   }
 
   function updateSpec() {
@@ -143,8 +265,8 @@
       className: fd.get("className"),
       toc: fd.get("toc"),
       colorMode: fd.get("colorMode"),
-      primaryColor: sanitizeHex(fd.get("primaryColor"), "#0F5132"),
-      secondaryColor: sanitizeHex(fd.get("secondaryColor"), "#D4AF37"),
+      primaryColor: colorMode.value === "manual" ? sanitizeHex(fd.get("primaryColor"), "#0F5132") : null,
+      secondaryColor: colorMode.value === "manual" ? sanitizeHex(fd.get("secondaryColor"), "#D4AF37") : null,
       stylePreset: fd.get("stylePreset") || "premium_school",
       heroPreset: fd.get("heroPreset") || "students_duo",
       fontGenre: fd.get("fontGenre") || "tegas_sans",
@@ -161,7 +283,10 @@
   function syncOutputState(hasJson) {
     currentJson = hasJson ? currentJson : "";
     jsonOutput.hidden = !hasJson;
+    jsonOutput.style.display = hasJson ? "block" : "none";
     emptyOutput.hidden = hasJson;
+    emptyOutput.style.display = hasJson ? "none" : "grid";
+    $("outputPanel").classList.toggle("has-output", hasJson);
     copyBtn.disabled = !hasJson;
     downloadBtn.disabled = !hasJson;
     chatgptBtn.disabled = !hasJson;
@@ -251,18 +376,19 @@
     primaryColor.value = primaryHex.value = "#75000C";
     secondaryColor.value = secondaryHex.value = "#D4AF37";
     $("stylePreset").value = "premium_school";
-    $("heroPreset").value = "students_duo";
-    $("fontGenre").value = "islami_arabic_latin";
+    heroPreset.value = "students_duo";
+    fontGenre.value = "islami_arabic_latin";
     $("authorFontGenre").value = "sans_clean";
     $("supportingFontGenre").value = "sans_clean";
     $("titleTextEffect").value = "gold_3d";
-    $("badgeStyle").value = "geometric_islamic";
+    badgeStyle.value = "geometric_islamic";
     $("moodPreset").value = "sejarah_kejayaan";
     $("footerText").value = "Untuk Kalangan Sendiri, YAYASAN BMCI";
     customInstruction.value = "latar kerajaan islam dulu kala, kejayaan, kebijaksanaan, arsitektur elegan, komposisi tidak ramai.";
     toc.value = "abbasiyah, ayyubiyah, turki utsmani";
     syncColorInputs(primaryColor, primaryHex, "#0F5132");
     syncColorInputs(secondaryColor, secondaryHex, "#D4AF37");
+    refreshAllCustomSelects();
     updateColorMode();
     updateSpec();
     updateCount();
@@ -292,6 +418,7 @@
   chatgptBtn.addEventListener("click", () => launchAi("https://chatgpt.com/"));
   geminiBtn.addEventListener("click", () => launchAi("https://gemini.google.com/app"));
 
+  enhanceCustomSelects();
   syncColorInputs(primaryColor, primaryHex, "#0F5132");
   syncColorInputs(secondaryColor, secondaryHex, "#D4AF37");
   updateColorMode();
