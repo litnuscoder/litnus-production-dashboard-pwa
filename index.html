@@ -25,8 +25,8 @@
     <section class="hero-copy">
       <div>
         <span class="eyebrow">LITNUS • TEMPLATE A4 FULL WRAP</span>
-        <h1>Layout seragam,<br><span>visual tetap bisa bervariasi.</span></h1>
-        <p>Isi data buku, pilih warna, nuansa, dan style, lalu hasilkan satu JSON prompt. Tata letak utama dikunci agar seri buku tetap konsisten meski visual tiap kelas berbeda.</p>
+        <h1>Layout seragam,<br><span>hero dan gaya visual lebih fleksibel.</span></h1>
+        <p>Isi data buku, tentukan hero, badge kelas, warna, nuansa, dan tipografi. Struktur penempatan tetap dikunci agar seri cover konsisten, tetapi isi visual bisa menyesuaikan mapel dan kebutuhan pondok pesantren.</p>
       </div>
       <div class="hero-badges"><span>Bleed 5 mm</span><span>Safe margin 15 mm</span><span>Spine otomatis</span><span>Anti AI slop</span></div>
     </section>
@@ -45,27 +45,51 @@
             <label class="field"><span>Jumlah halaman <b>*</b></span><input name="pages" id="pages" type="number" min="1" max="3000" step="1" placeholder="52" required /></label>
           </div>
           <div class="form-grid two">
-            <label class="field"><span>Jenjang <b>*</b></span><select name="level" id="level" required><option value="">Pilih jenjang</option><option>SD/MI</option><option>SMP/MTs</option><option>SMA/MA</option><option>SMK/MAK</option><option value="Lainnya">Lainnya</option></select></label>
+            <label class="field"><span>Jenjang <b>*</b></span><div class="select-wrap"><select name="level" id="level" required><option value="">Pilih jenjang</option><option>SD/MI</option><option>SMP/MTs</option><option>SMA/MA</option><option>SMK/MAK</option><option value="Lainnya">Lainnya</option></select></div></label>
             <label class="field"><span>Kelas <b>*</b></span><input name="className" id="className" placeholder="Contoh: X" required maxlength="30" /></label>
           </div>
 
           <div class="divider"></div>
-          <div class="section-title"><span class="step">02</span><div><h3>Warna, Style & Nuansa</h3><p>Kontrol visual boleh berubah; posisi logo, judul, hero, penulis, dan badge kelas tetap dikunci.</p></div></div>
-          <div class="form-grid two color-grid">
+          <div class="section-title"><span class="step">02</span><div><h3>Hero, Warna, Style & Tipografi</h3><p>Kontrol visual bebas, tetapi posisi logo, judul, penulis, badge kelas, dan struktur spread tetap dikunci.</p></div></div>
+
+          <div class="form-grid two">
+            <label class="field"><span>Pilihan hero</span><div class="select-wrap"><select name="heroPreset" id="heroPreset"><option value="students_duo">Siswa & Siswi Terpisah — Rekomendasi</option><option value="student_boy_only">Siswa Laki-Laki Saja</option><option value="student_girl_only">Siswi Perempuan Saja</option><option value="students_plus_objects">Siswa + Objek Materi</option><option value="object_focus">Objek / Aktivitas Materi Utama</option><option value="historical_scene">Tokoh / Adegan Kontekstual Materi</option></select></div><small class="field-help" id="heroHelp">Duo siswa-siswi santri, laki-laki bersongkok nasional, perempuan berhijab, posisi kanan-kiri terpisah, tidak bersentuhan.</small></label>
+            <label class="field"><span>Style preset</span><div class="select-wrap"><select name="stylePreset" id="stylePreset"><option value="premium_school">Premium School</option><option value="modern_islamic">Modern Islamic</option><option value="academic_clean">Academic Clean</option><option value="cinematic_education">Cinematic Educational</option><option value="soft_illustrated">Soft Illustrated</option></select></div></label>
+          </div>
+
+          <div class="form-grid two">
+            <label class="field"><span>Strategi warna</span><div class="select-wrap"><select name="colorMode" id="colorMode"><option value="auto">AI Bebas Memilih Warna</option><option value="manual">Manual Primary + Accent</option></select></div><small class="field-help">Pilih AI bebas bila tidak ingin terikat warna template. Manual cocok bila Anda sudah punya arah warna sendiri.</small></label>
+            <label class="field"><span>Nuansa tema</span><div class="select-wrap"><select name="moodPreset" id="moodPreset"><option value="none">Netral / otomatis</option><option value="cinta_indonesia">Cinta Indonesia</option><option value="islami_prestasi">Islami & Prestasi</option><option value="akademik_elegan">Akademik Elegan</option><option value="hangat_asrama">Hangat Asrama</option><option value="sejarah_kejayaan">Sejarah Kejayaan</option></select></div></label>
+          </div>
+
+          <div class="form-grid two color-grid" id="colorFields">
             <label class="field"><span>Primary color</span><div class="color-control"><input type="color" id="primaryColor" name="primaryColor" value="#0F5132" /><input type="text" id="primaryHex" value="#0F5132" maxlength="7" aria-label="Primary hex" /></div></label>
             <label class="field"><span>Secondary / accent</span><div class="color-control"><input type="color" id="secondaryColor" name="secondaryColor" value="#D4AF37" /><input type="text" id="secondaryHex" value="#D4AF37" maxlength="7" aria-label="Secondary hex" /></div></label>
           </div>
+
           <div class="form-grid two">
-            <label class="field"><span>Style preset</span><select name="stylePreset" id="stylePreset"><option value="premium_school">Premium School</option><option value="modern_islamic">Modern Islamic</option><option value="academic_clean">Academic Clean</option><option value="cinematic_education">Cinematic Educational</option><option value="soft_illustrated">Soft Illustrated</option></select></label>
-            <label class="field"><span>Genre font judul</span><select name="fontGenre" id="fontGenre"><option value="tegas_sans">Tegas — Sans Serif</option><option value="elegan_serif">Elegan — Serif</option><option value="klasik_akademik">Klasik Akademik — Slab/Serif</option><option value="islami_arabic_latin">Islami — Arabic-Inspired Latin</option><option value="modern_premium">Modern Premium — Sans/Modern Serif</option><option value="friendly_rounded">Ramah — Rounded Sans</option><option value="formal_resmi">Formal Resmi — Formal Serif/Sans</option></select><small class="field-help" id="fontGenreHelp">Tegas, modern, dan mudah dibaca. Cocok untuk mapel eksak dan ekonomi.</small></label>
+            <label class="field"><span>Genre font judul</span><div class="select-wrap"><select name="fontGenre" id="fontGenre"><option value="tegas_sans">Tegas — Sans Serif</option><option value="elegan_serif">Elegan — Serif</option><option value="klasik_akademik">Klasik Akademik — Slab/Serif</option><option value="islami_arabic_latin">Islami — Arabic-Inspired Latin</option><option value="modern_premium">Modern Premium — Sans/Modern Serif</option><option value="friendly_rounded">Ramah — Rounded Sans</option><option value="formal_resmi">Formal Resmi — Formal Serif/Sans</option></select></div><small class="field-help" id="fontGenreHelp">Tegas, modern, dan mudah dibaca. Cocok untuk mapel eksak dan ekonomi.</small></label>
+            <label class="field"><span>Text effect judul</span><div class="select-wrap"><select name="titleTextEffect" id="titleTextEffect"><option value="clean_flat">Clean Flat</option><option value="soft_emboss">Soft Emboss</option><option value="gold_3d">3D Gold</option><option value="glass_3d">3D Glass</option><option value="bold_outline">Bold Outline</option></select></div></label>
           </div>
+
           <div class="form-grid two">
-            <label class="field"><span>Text effect judul</span><select name="titleTextEffect" id="titleTextEffect"><option value="clean_flat">Clean Flat</option><option value="soft_emboss">Soft Emboss</option><option value="gold_3d">3D Gold</option><option value="glass_3d">3D Glass</option><option value="bold_outline">Bold Outline</option></select></label>
-            <label class="field"><span>Nuansa tema</span><select name="moodPreset" id="moodPreset"><option value="none">Netral / otomatis</option><option value="cinta_indonesia">Cinta Indonesia</option><option value="islami_prestasi">Islami & Prestasi</option><option value="akademik_elegan">Akademik Elegan</option><option value="hangat_asrama">Hangat Asrama</option><option value="sejarah_kejayaan">Sejarah Kejayaan</option></select></label>
+            <label class="field"><span>Gaya huruf penulis</span><div class="select-wrap"><select name="authorFontGenre" id="authorFontGenre"><option value="sans_clean">Sans Serif Bersih</option><option value="serif_elegan">Serif Elegan</option><option value="slab_tegas">Slab Serif Tegas</option><option value="humanist_sans">Humanist Sans</option><option value="islami_halus">Islami Halus</option></select></div></label>
+            <label class="field"><span>Gaya huruf teks pendukung</span><div class="select-wrap"><select name="supportingFontGenre" id="supportingFontGenre"><option value="sans_clean">Sans Serif Bersih</option><option value="serif_elegan">Serif Elegan</option><option value="slab_tegas">Slab Serif Tegas</option><option value="humanist_sans">Humanist Sans</option><option value="islami_halus">Islami Halus</option></select></div></label>
           </div>
-          <label class="field"><span>Teks bawah kelas</span><input name="footerText" id="footerText" value="Untuk Kalangan Sendiri, YAYASAN BMCI" maxlength="180" /></label>
-          <label class="field"><span>Instruksi custom <em>opsional</em></span><textarea name="customInstruction" id="customInstruction" class="short-textarea" rows="4" maxlength="1800" placeholder="Contoh: latar kerajaan Islam dulu kala, kebijaksanaan, arsitektur elegan, lampu gantung klasik, judul memakai efek 3D emas yang elegan, jangan terlalu ramai."></textarea><small class="counter"><span id="customCount">0</span>/1.800 karakter</small></label>
+
+          <div class="form-grid two">
+            <label class="field"><span>Style badge kelas</span><div class="select-wrap"><select name="badgeStyle" id="badgeStyle"><option value="geometric_islamic">Geometris Islami — Rekomendasi</option><option value="circle_medallion">Lingkaran Medallion</option><option value="mosque_dome">Kubah Masjid</option><option value="shield_academic">Perisai Akademik</option><option value="star_eight">Bintang Delapan Sisi</option></select></div><small class="field-help" id="badgeHelp">Badge premium bergaya geometris islami agar kelas lebih menonjol dan tetap serasi dengan tema pondok pesantren.</small></label>
+            <label class="field"><span>Teks bawah kelas</span><input name="footerText" id="footerText" value="Untuk Kalangan Sendiri, YAYASAN BMCI" maxlength="180" /></label>
+          </div>
+
+          <div class="form-grid two">
+            <label class="field"><span>Teks bawah penulis <em>opsional</em></span><input name="authorSubtext" id="authorSubtext" placeholder="Contoh: Guru Mata Pelajaran / S.Pd." maxlength="140" /></label>
+            <label class="field"><span>Catatan hero <em>opsional</em></span><input name="heroNote" id="heroNote" placeholder="Contoh: jangan pakai meja, fokus membaca kitab / peta / alat praktik" maxlength="220" /></label>
+          </div>
+
+          <label class="field"><span>Instruksi custom <em>opsional</em></span><textarea name="customInstruction" id="customInstruction" class="short-textarea" rows="4" maxlength="1800" placeholder="Contoh: latar kerajaan Islam dulu kala, kebijaksanaan, arsitektur elegan, lampu gantung klasik, judul memakai efek 3D emas yang elegan, jangan terlalu ramai. Detail hero juga boleh ditulis di sini."></textarea><small class="counter"><span id="customCount">0</span>/1.800 karakter</small></label>
           <div class="notice"><strong>Logo diunggah saat prompting ke AI.</strong><p>Aplikasi ini tidak menerima upload logo. Saat membuka ChatGPT atau Gemini, JSON otomatis disalin. Di AI generator, unggah file logo yang ingin dipakai lalu tempel JSON.</p></div>
+          <div class="notice"><strong>Aturan moral pondok pesantren aktif.</strong><p>Jika hero memakai siswa/siswi, laki-laki wajib bersongkok nasional, perempuan wajib berkerudung, dan posisi mereka tidak boleh bersentuhan atau bergandengan. Komposisi dibuat kanan-kiri terpisah dan sopan.</p></div>
           <div class="notice"><strong>Layout tetap dikunci.</strong><p>Instruksi custom hanya mengubah treatment visual. Ia tidak boleh mengubah posisi logo kanan atas, judul tengah, penulis kiri bawah, badge kelas kanan bawah, safe margin, punggung, atau aturan no-ISBN.</p></div>
 
           <div class="divider"></div>
@@ -85,7 +109,7 @@
             <div class="bleed-tag">5</div>
             <div class="cover back"><span>BACK</span><div class="safe-box synopsis"></div></div>
             <div class="spine" id="spinePreview"><span>SPINE</span></div>
-            <div class="cover front"><span>FRONT</span><div class="safe-box logo-zone">LOGO</div><div class="safe-box title-zone">JUDUL</div><div class="hero-zone">HERO</div><div class="safe-box author-zone">PENULIS</div><div class="class-medallion"><b id="classPreview">X</b><small id="levelPreview">SMA/MA</small></div><div class="safe-box footer-zone">NUANSA / FOOTER</div></div>
+            <div class="cover front"><span>FRONT</span><div class="safe-box logo-zone">LOGO</div><div class="safe-box title-zone">JUDUL</div><div class="hero-zone" id="heroPreview">HERO</div><div class="safe-box author-zone">PENULIS</div><div class="author-subline">SUBTEKS</div><div class="class-medallion"><b id="classPreview">X</b><small id="levelPreview">SMA/MA</small></div><div class="safe-box footer-zone">TEKS KELAS</div></div>
             <div class="bleed-tag">5</div>
           </div>
           <div class="formula"><span>Lebar punggung</span><code><span id="pagesFormula">halaman</span> × 0,0472 mm = <b id="formulaResult">—</b></code></div>
@@ -100,13 +124,13 @@
             <div><strong>Kirim ke AI Generator</strong><p>Saat tombol diklik, JSON otomatis disalin. Setelah AI terbuka, unggah logo pada chat yang sama lalu tempel JSON.</p></div>
             <div class="ai-actions"><button class="btn btn-primary" id="chatgptBtn" type="button" disabled>ChatGPT <span>Direkomendasikan</span></button><button class="btn btn-soft" id="geminiBtn" type="button" disabled>Gemini</button></div>
           </div>
-          <div class="output-foot"><span>Template</span><code>LITNUS-SCHOOL-WRAP-A4-V1.4</code></div>
+          <div class="output-foot"><span>Template</span><code>LITNUS-SCHOOL-WRAP-A4-V1.5</code></div>
         </section>
       </aside>
     </div>
   </main>
 
-  <dialog id="helpDialog" class="help-dialog"><form method="dialog" class="dialog-card"><div class="dialog-head"><div><span class="eyebrow">PETUNJUK SINGKAT</span><h2>Dari data buku ke cover AI</h2></div><button class="icon-btn" value="close">×</button></div><ol class="steps-list"><li><span>1</span><div><strong>Isi informasi buku</strong><p>Masukkan judul, penulis, halaman, jenjang, kelas, dan daftar isi.</p></div></li><li><span>2</span><div><strong>Pilih warna, style, dan nuansa</strong><p>Atur primary, secondary, style preset, genre font judul, text effect, nuansa tema, teks bawah kelas, serta instruksi custom bila diperlukan.</p></div></li><li><span>3</span><div><strong>Generate JSON</strong><p>Spine, ukuran kanvas, layout lock, sinopsis, dan negative prompt disusun otomatis.</p></div></li><li><span>4</span><div><strong>Buka ChatGPT</strong><p>Klik ChatGPT atau Gemini. JSON otomatis disalin sebelum tab AI dibuka.</p></div></li><li><span>5</span><div><strong>Unggah logo di AI</strong><p>Logo tidak diunggah di aplikasi ini. Lampirkan logo langsung pada chat AI yang sama, lalu tempel JSON.</p></div></li></ol><div class="privacy-box"><strong>Tidak ada database.</strong><p>Aplikasi hanya memproses form secara stateless untuk menyusun prompt.</p></div><button class="btn btn-primary full" value="close">Mengerti</button></form></dialog>
+  <dialog id="helpDialog" class="help-dialog"><form method="dialog" class="dialog-card"><div class="dialog-head"><div><span class="eyebrow">PETUNJUK SINGKAT</span><h2>Dari data buku ke cover AI</h2></div><button class="icon-btn" value="close">×</button></div><ol class="steps-list"><li><span>1</span><div><strong>Isi informasi buku</strong><p>Masukkan judul, penulis, halaman, jenjang, kelas, dan daftar isi.</p></div></li><li><span>2</span><div><strong>Pilih hero, warna, dan style</strong><p>Tentukan hero, strategi warna, genre font, text effect, style badge kelas, dan nuansa tema.</p></div></li><li><span>3</span><div><strong>Tambahkan detail pendukung</strong><p>Isi teks bawah penulis, teks bawah kelas, catatan hero, dan instruksi custom bila diperlukan.</p></div></li><li><span>4</span><div><strong>Generate JSON</strong><p>Spine, ukuran kanvas, layout lock, sinopsis, dan negative prompt disusun otomatis.</p></div></li><li><span>5</span><div><strong>Buka ChatGPT</strong><p>Klik ChatGPT atau Gemini. JSON otomatis disalin sebelum tab AI dibuka. Logo diunggah langsung pada chat AI.</p></div></li></ol><div class="privacy-box"><strong>Tidak ada database.</strong><p>Aplikasi hanya memproses form secara stateless untuk menyusun prompt.</p></div><button class="btn btn-primary full" value="close">Mengerti</button></form></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/app.js" defer></script>
 </body>

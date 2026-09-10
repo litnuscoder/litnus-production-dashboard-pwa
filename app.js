@@ -17,11 +17,41 @@
   const secondaryHex = $("secondaryHex");
   const className = $("className");
   const level = $("level");
+  const heroPreset = $("heroPreset");
+  const fontGenre = $("fontGenre");
+  const badgeStyle = $("badgeStyle");
+  const colorMode = $("colorMode");
+  const colorFields = $("colorFields");
   const chatgptBtn = $("chatgptBtn");
   const geminiBtn = $("geminiBtn");
-  const fontGenre = $("fontGenre");
-  const fontGenreHelp = $("fontGenreHelp");
   let currentJson = "";
+
+  const heroHelpMap = {
+    students_duo: "Duo siswa-siswi santri, laki-laki bersongkok nasional, perempuan berhijab, posisi kanan-kiri terpisah, tidak bersentuhan.",
+    student_boy_only: "Hero utama satu siswa laki-laki santri, bersongkok nasional, rapi, sopan, fokus pada materi pelajaran.",
+    student_girl_only: "Hero utama satu siswi santri, berhijab rapi, sopan, fokus pada materi pelajaran.",
+    students_plus_objects: "Siswa/siswi santri tetap hadir, lalu dipadukan dengan objek materi yang paling relevan secara natural.",
+    object_focus: "Hero utama berupa objek, aktivitas, atau scene pembelajaran yang paling relevan dengan isi buku. Siswa boleh minim atau tidak muncul.",
+    historical_scene: "Hero utama berupa tokoh, adegan, atau latar kontekstual materi. Jika siswa muncul, aturan busana santri tetap berlaku."
+  };
+
+  const fontHelpMap = {
+    tegas_sans: "Tegas, modern, dan mudah dibaca. Cocok untuk mapel eksak, ekonomi, dan buku yang perlu tampak lugas.",
+    elegan_serif: "Anggun dan berkelas. Cocok untuk bahasa, sastra, sejarah, dan buku bernuansa premium.",
+    klasik_akademik: "Formal, mapan, dan terasa akademik. Cocok untuk seri buku sekolah yang serius.",
+    islami_arabic_latin: "Huruf Latin bernuansa islami, terinspirasi kaligrafi Arab, tetapi tetap jelas terbaca.",
+    modern_premium: "Modern, polished, dan profesional. Fleksibel untuk banyak mata pelajaran.",
+    friendly_rounded: "Ramah dan ringan. Cocok untuk jenjang bawah atau buku yang ingin terasa bersahabat.",
+    formal_resmi: "Resmi, disiplin, dan institusional. Cocok untuk modul yayasan atau buku pedoman."
+  };
+
+  const badgeHelpMap = {
+    geometric_islamic: "Badge premium bergaya geometris islami agar kelas lebih menonjol dan tetap serasi dengan tema pondok pesantren.",
+    circle_medallion: "Badge lingkaran medallion memberi kesan klasik, rapi, dan mudah dipadukan dengan banyak tema.",
+    mosque_dome: "Badge kubah masjid cocok untuk buku bernuansa islami yang ingin terasa khas namun tetap elegan.",
+    shield_academic: "Badge perisai akademik memberi kesan formal, kokoh, dan cocok untuk buku sekolah resmi.",
+    star_eight: "Badge bintang delapan sisi terasa islami, ornamental, dan tetap kuat sebagai penanda kelas."
+  };
 
   function round2(n) { return Math.round((n + Number.EPSILON) * 100) / 100; }
   function escapeHtml(str) { return String(str).replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c])); }
@@ -56,6 +86,11 @@
     if (source === secondaryColor || source === secondaryHex) document.documentElement.style.setProperty("--secondary", value);
   }
 
+  function updateColorMode() {
+    const manual = colorMode.value === "manual";
+    colorFields.classList.toggle("disabled-group", !manual);
+  }
+
   function updateSpec() {
     const p = Number(pages.value);
     if (Number.isFinite(p) && p > 0) {
@@ -82,25 +117,16 @@
     $("customCount").textContent = customInstruction.value.length.toLocaleString("id-ID");
   }
 
-
-  const FONT_GENRE_HELP = {
-    tegas_sans: "Tegas, modern, dan sangat mudah dibaca. Cocok untuk matematika, ekonomi, informatika, dan IPA.",
-    elegan_serif: "Anggun, berkelas, dan berwibawa. Cocok untuk bahasa, sastra, sejarah, dan SKI.",
-    klasik_akademik: "Formal dan mapan dengan karakter serif/slab. Cocok untuk buku ajar akademik dan ilmu sosial.",
-    islami_arabic_latin: "Huruf Latin dengan nuansa kaligrafis Arab yang halus. Cocok untuk PAI, SKI, Bahasa Arab, dan madrasah.",
-    modern_premium: "Polished dan kontemporer. Cocok untuk seri buku sekolah modern lintas mata pelajaran.",
-    friendly_rounded: "Ramah dan ringan tanpa terasa kekanak-kanakan. Cocok untuk SD, SMP, dan modul pengantar.",
-    formal_resmi: "Disiplin dan institusional. Cocok untuk modul resmi sekolah atau yayasan."
-  };
-
-  function updateFontGenreHelp() {
-    if (!fontGenreHelp || !fontGenre) return;
-    fontGenreHelp.textContent = FONT_GENRE_HELP[fontGenre.value] || FONT_GENRE_HELP.tegas_sans;
-  }
-
   function updatePreviewLabels() {
     $("classPreview").textContent = className.value.trim() || "X";
     $("levelPreview").textContent = level.value.trim() || "SMA/MA";
+    $("heroPreview").textContent = heroPreset.options[heroPreset.selectedIndex]?.text?.split("—")[0].trim().toUpperCase() || "HERO";
+  }
+
+  function updateDynamicHelp() {
+    $("heroHelp").textContent = heroHelpMap[heroPreset.value] || heroHelpMap.students_duo;
+    $("fontGenreHelp").textContent = fontHelpMap[fontGenre.value] || fontHelpMap.tegas_sans;
+    $("badgeHelp").textContent = badgeHelpMap[badgeStyle.value] || badgeHelpMap.geometric_islamic;
   }
 
   function payload() {
@@ -110,15 +136,22 @@
       title: fd.get("title"),
       subtitle: fd.get("subtitle"),
       author: fd.get("author"),
+      authorSubtext: fd.get("authorSubtext"),
+      heroNote: fd.get("heroNote"),
       pages: Number(fd.get("pages")),
       level: fd.get("level"),
       className: fd.get("className"),
       toc: fd.get("toc"),
+      colorMode: fd.get("colorMode"),
       primaryColor: sanitizeHex(fd.get("primaryColor"), "#0F5132"),
       secondaryColor: sanitizeHex(fd.get("secondaryColor"), "#D4AF37"),
       stylePreset: fd.get("stylePreset") || "premium_school",
+      heroPreset: fd.get("heroPreset") || "students_duo",
       fontGenre: fd.get("fontGenre") || "tegas_sans",
+      authorFontGenre: fd.get("authorFontGenre") || "sans_clean",
+      supportingFontGenre: fd.get("supportingFontGenre") || "sans_clean",
       titleTextEffect: fd.get("titleTextEffect") || "clean_flat",
+      badgeStyle: fd.get("badgeStyle") || "geometric_islamic",
       moodPreset: fd.get("moodPreset") || "none",
       footerText: fd.get("footerText"),
       customInstruction: fd.get("customInstruction")
@@ -209,22 +242,31 @@
     $("title").value = "Kejayaan Islam Abad ke 10";
     $("subtitle").value = "Abbasiyah, Ayyubiyah, Turki Utsmani";
     $("author").value = "Muhammad Ulinnuha";
+    $("authorSubtext").value = "Guru Mata Pelajaran";
+    $("heroNote").value = "dua siswa sedang membaca buku sejarah, latar arsitektur Islam klasik";
     pages.value = "52";
     level.value = "SMA/MA";
     className.value = "X";
+    colorMode.value = "auto";
     primaryColor.value = primaryHex.value = "#75000C";
-    secondaryColor.value = secondaryHex.value = "#D435AA";
+    secondaryColor.value = secondaryHex.value = "#D4AF37";
     $("stylePreset").value = "premium_school";
+    $("heroPreset").value = "students_duo";
     $("fontGenre").value = "islami_arabic_latin";
+    $("authorFontGenre").value = "sans_clean";
+    $("supportingFontGenre").value = "sans_clean";
     $("titleTextEffect").value = "gold_3d";
-    $("moodPreset").value = "cinta_indonesia";
+    $("badgeStyle").value = "geometric_islamic";
+    $("moodPreset").value = "sejarah_kejayaan";
     $("footerText").value = "Untuk Kalangan Sendiri, YAYASAN BMCI";
-    customInstruction.value = "latar kerajaan Islam dulu kala, kejayaan, kebijaksanaan, arsitektur elegan.";
-    toc.value = "abbasiyah, umayyah, turki utsmani";
+    customInstruction.value = "latar kerajaan islam dulu kala, kejayaan, kebijaksanaan, arsitektur elegan, komposisi tidak ramai.";
+    toc.value = "abbasiyah, ayyubiyah, turki utsmani";
     syncColorInputs(primaryColor, primaryHex, "#0F5132");
     syncColorInputs(secondaryColor, secondaryHex, "#D4AF37");
+    updateColorMode();
     updateSpec();
     updateCount();
+    updateDynamicHelp();
     updatePreviewLabels();
     showToast("Contoh diisi. Silakan sesuaikan.");
   }
@@ -234,7 +276,10 @@
   customInstruction.addEventListener("input", updateCount);
   className.addEventListener("input", updatePreviewLabels);
   level.addEventListener("change", updatePreviewLabels);
-  fontGenre.addEventListener("change", updateFontGenreHelp);
+  heroPreset.addEventListener("change", () => { updateDynamicHelp(); updatePreviewLabels(); });
+  fontGenre.addEventListener("change", updateDynamicHelp);
+  badgeStyle.addEventListener("change", updateDynamicHelp);
+  colorMode.addEventListener("change", updateColorMode);
   primaryColor.addEventListener("input", () => syncColorInputs(primaryColor, primaryHex, "#0F5132"));
   secondaryColor.addEventListener("input", () => syncColorInputs(secondaryColor, secondaryHex, "#D4AF37"));
   primaryHex.addEventListener("change", () => syncColorInputs(primaryHex, primaryColor, "#0F5132"));
@@ -249,9 +294,10 @@
 
   syncColorInputs(primaryColor, primaryHex, "#0F5132");
   syncColorInputs(secondaryColor, secondaryHex, "#D4AF37");
+  updateColorMode();
   updateSpec();
   updateCount();
+  updateDynamicHelp();
   updatePreviewLabels();
-  updateFontGenreHelp();
   syncOutputState(false);
 })();
